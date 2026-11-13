@@ -61,7 +61,7 @@ TiDB accepts the schema's `CHECK` rules but does not enforce them by default. Th
 
 1. Go to <https://aistudio.google.com/apikey> and create an API key.
 2. You will paste it into Render as `AI_API_KEY` (with `AI_PROVIDER=gemini`).
-3. The default model is `gemini-2.5-flash`. If Google retires it, set `AI_MODEL` to a current Flash model name from the Gemini docs.
+3. The default model is `gemini-3.5-flash`. If Google retires it, set `AI_MODEL` to a current Flash model name from the Gemini docs.
 
 To use OpenAI or Claude instead, set `AI_PROVIDER=openai` or `AI_PROVIDER=anthropic` and use that provider's key.
 
