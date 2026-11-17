@@ -13,7 +13,7 @@ import { useFetch, useForm } from '../../hooks/useFetch'
 import { del, get, mediaUrl, patch, post, put, toFormData } from '../../services/api'
 import { label, options } from '../../utils/labels'
 import { money, num, pick } from '../../utils/format'
-import Icon from '../../components/Icon'
+import Icon, { Glyph } from '../../components/Icon'
 import ImagePicker from '../../components/ImagePicker'
 import LocationFields from '../../components/LocationFields'
 import ServiceAreasEditor from '../../components/ServiceAreasEditor'
@@ -201,7 +201,7 @@ function ServiceList({ kind }) {
         <div className="manage-list">
           {data.map((m) => (
             <article key={m.id} className="manage-item">
-              <div className="manage-thumb">{m.cover_image ? <img src={mediaUrl(m.cover_image)} alt="" /> : isVehicle ? '🚚' : '🚜'}</div>
+              <div className="manage-thumb">{m.cover_image ? <img src={mediaUrl(m.cover_image)} alt="" /> : <Glyph value={isVehicle ? '🚚' : '🚜'} size={26} />}</div>
               <div className="manage-body">
                 <h3>
                   {m.name} {isVehicle && <small className="muted">({label('vehicleType', m.vehicle_type, lang)})</small>}{' '}
@@ -235,7 +235,7 @@ export default function MyServices() {
   const { tr } = useLang()
   return (
     <div className="page">
-      <PageHeader title={tr('আমার সেবা', 'My services')} subtitle={tr('কৃষকেরা যা দেখে বুক করবেন, তা এখানে হালনাগাদ রাখুন।', 'Keep what farmers see and book up to date.')} />
+      <PageHeader title={tr('আমার সেবা', 'My services')} />
       {user.role === 'labour' && <LabourProfile />}
       {(user.role === 'harvester_owner' || user.role === 'tractor_owner') && <ServiceList kind="machine" />}
       {user.role === 'transport_owner' && <ServiceList kind="vehicle" />}

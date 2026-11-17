@@ -32,7 +32,7 @@ export default function Complaints() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('অভিযোগ ও সহায়তা', 'Complaints & help')} subtitle={tr('কোনো সমস্যা হলে অ্যাডমিনকে জানান', 'Tell the administrators about any problem')} />
+      <PageHeader title={tr('অভিযোগ ও সহায়তা', 'Complaints & help')} />
       <div className="two-col even">
         <Card title={tr('নতুন অভিযোগ', 'New complaint')}>
           <form onSubmit={submit} className="form" noValidate>

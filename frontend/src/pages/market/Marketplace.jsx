@@ -17,7 +17,7 @@ export function ListingCard({ listing: l, compact }) {
   return (
     <Link to={`/listings/${l.id}`} className={`listing-card ${compact ? 'compact' : ''}`}>
       <div className="listing-photo">
-        {l.cover_image ? <img src={mediaUrl(l.cover_image)} alt="" loading="lazy" /> : <span aria-hidden="true">🌾</span>}
+        {l.cover_image ? <img src={mediaUrl(l.cover_image)} alt="" loading="lazy" /> : <Icon name="wheat" size={34} />}
       </div>
       <div className="listing-body">
         <h3>{pick(l, 'crop', lang)} {l.variety && <small>({l.variety})</small>}</h3>
@@ -70,7 +70,7 @@ export default function Marketplace() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('ফসলের বাজার', 'Crop marketplace')} subtitle={tr('সরাসরি কৃষকের কাছ থেকে ফসল কিনুন', 'Buy crops directly from farmers')} />
+      <PageHeader title={tr('ফসলের বাজার', 'Crop marketplace')} />
       <div className="filters">
         <div className="field field-wide">
           <label htmlFor="market-search">{tr('খুঁজুন', 'Search')}</label>

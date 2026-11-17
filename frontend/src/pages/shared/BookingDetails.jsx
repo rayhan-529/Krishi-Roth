@@ -9,6 +9,7 @@ import { label } from '../../utils/labels'
 import { date, dateTime, money, num, pick } from '../../utils/format'
 import ReviewModal from '../../components/ReviewModal'
 import { Alert, Avatar, Card, ConfirmButton, ErrorBox, Loader, PageHeader, Stars, StatusBadge, VerifiedBadge } from '../../components/ui'
+import Icon from '../../components/Icon'
 
 export default function BookingDetails() {
   const { id } = useParams()
@@ -71,7 +72,7 @@ export default function BookingDetails() {
               {((isRequester && ['pending', 'accepted'].includes(b.status)) || (isProvider && b.status === 'accepted')) && (
                 <ConfirmButton className="btn btn-danger-outline" message={tr('বুকিং বাতিল করবেন?', 'Cancel this booking?')} reasonLabel={tr('কারণ', 'Reason')} onConfirm={(r) => act('cancel', r)}>{tr('বাতিল করুন', 'Cancel booking')}</ConfirmButton>
               )}
-              {b.can_review && <button type="button" className="btn btn-primary" onClick={() => setReviewing(true)}>⭐ {tr('রেটিং দিন', 'Rate')}</button>}
+              {b.can_review && <button type="button" className="btn btn-primary" onClick={() => setReviewing(true)}><Icon name="star" size={16} /> {tr('রেটিং দিন', 'Rate')}</button>}
             </div>
           </Card>
         </div>
@@ -82,7 +83,7 @@ export default function BookingDetails() {
                 <Avatar src={other.photo} name={other.name} size={48} />
                 <span><strong>{other.name}</strong> <VerifiedBadge status={other.verification} /></span>
               </Link>
-              {other.phone ? <p className="mt">📞 <a href={`tel:${other.phone}`}>{other.phone}</a></p> : <p className="muted small mt">{tr('বুকিং গৃহীত হলে ফোন নম্বর দেখা যাবে।', 'The phone number is shown once the booking is accepted.')}</p>}
+              {other.phone ? <p className="mt"><Icon name="phone" size={15} /> <a href={`tel:${other.phone}`}>{other.phone}</a></p> : <p className="muted small mt">{tr('বুকিং গৃহীত হলে ফোন নম্বর দেখা যাবে।', 'The phone number is shown once the booking is accepted.')}</p>}
             </Card>
           )}
           {b.reviews.length > 0 && (

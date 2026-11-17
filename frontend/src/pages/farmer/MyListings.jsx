@@ -57,7 +57,7 @@ export default function MyListings() {
         <div className="manage-list">
           {data.map((l) => (
             <article key={l.id} className="manage-item">
-              <div className="manage-thumb">{l.cover_image ? <img src={mediaUrl(l.cover_image)} alt="" /> : '🌾'}</div>
+              <div className="manage-thumb">{l.cover_image ? <img src={mediaUrl(l.cover_image)} alt="" /> : <Icon name="wheat" size={26} />}</div>
               <div className="manage-body">
                 <h3>
                   <Link to={`/listings/${l.id}`}>{pick(l, 'crop', lang)}</Link> {l.variety && <small className="muted">({l.variety})</small>}{' '}

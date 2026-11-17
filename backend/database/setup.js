@@ -179,6 +179,33 @@ async function applyUpgrades(conn, dbName) {
     }
   }
 
+  // v1.2: Google / Apple sign-in ids.
+  for (const column of ["google_id", "apple_id"]) {
+    if (!(await columnExists("users", column))) {
+      const key = `uq_users_${column.split("_")[0]}`;
+      await conn.query(`ALTER TABLE users ADD COLUMN ${column} VARCHAR(64) NULL, ADD UNIQUE KEY ${key} (${column})`);
+      console.log(`Upgrade: added users.${column}`);
+    }
+  }
+
+  // v1.3: Safe Trade escrow columns on trades (wallet tables come from schema.sql).
+  const escrowColumns = [
+    ["escrow_status", "ENUM('none','held','released','refunded') NOT NULL DEFAULT 'none'"],
+    ["escrow_amount", "DECIMAL(14,2) NULL"],
+    ["escrow_held_at", "DATETIME NULL"],
+    ["escrow_settled_at", "DATETIME NULL"],
+    ["auto_release_at", "DATETIME NULL"]
+  ];
+  for (const [column, definition] of escrowColumns) {
+    if (!(await columnExists("trade_records", column))) {
+      await conn.query(`ALTER TABLE trade_records ADD COLUMN ${column} ${definition}`);
+      console.log(`Upgrade: added trade_records.${column}`);
+    }
+  }
+  await conn.query(
+    "ALTER TABLE trade_records MODIFY payment_method ENUM('cash','bkash','nagad','rocket','bank_transfer','other','wallet') NULL"
+  );
+
   // v1.1: the project no longer ships sample (demonstration) market prices.
   const [removed] = await conn.query("DELETE FROM market_prices WHERE source = 'sample'");
   if (removed.affectedRows > 0) {

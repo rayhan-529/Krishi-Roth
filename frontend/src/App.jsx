@@ -14,9 +14,13 @@ import { HOME_BY_ROLE, PROVIDER_ROLES } from './utils/nav'
 // Public
 const Home = lazy(() => import('./pages/public/Home'))
 const About = lazy(() => import('./pages/public/About'))
+const Privacy = lazy(() => import('./pages/public/Legal').then((m) => ({ default: m.Privacy })))
+const Terms = lazy(() => import('./pages/public/Legal').then((m) => ({ default: m.Terms })))
 const NotFound = lazy(() => import('./pages/public/NotFound'))
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
+const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
+const LoginLink = lazy(() => import('./pages/auth/LoginLink'))
 const MarketPrices = lazy(() => import('./pages/market/MarketPrices'))
 const Marketplace = lazy(() => import('./pages/market/Marketplace'))
 const ListingDetails = lazy(() => import('./pages/market/ListingDetails'))
@@ -42,6 +46,8 @@ const MyServices = lazy(() => import('./pages/provider/MyServices'))
 // Shared (logged in)
 const Offers = lazy(() => import('./pages/shared/Offers'))
 const Trades = lazy(() => import('./pages/shared/Trades'))
+const Wallet = lazy(() => import('./pages/shared/Wallet'))
+const AdminWallet = lazy(() => import('./pages/admin/AdminWallet'))
 const TradeDetails = lazy(() => import('./pages/shared/TradeDetails'))
 const Bookings = lazy(() => import('./pages/shared/Bookings'))
 const BookingDetails = lazy(() => import('./pages/shared/BookingDetails'))
@@ -83,9 +89,13 @@ export default function App() {
             <>
               <Route index element={<Home />} />
               <Route path="about" element={<About />} />
+              <Route path="privacy" element={<Privacy />} />
+              <Route path="terms" element={<Terms />} />
               <Route path="login" element={<Login />} />
               <Route path="admin/login" element={<Navigate to="/login" replace />} />
               <Route path="register" element={<Register />} />
+              <Route path="forgot-password" element={<ForgotPassword />} />
+              <Route path="login/link" element={<LoginLink />} />
               <Route path="market-prices" element={<MarketPrices />} />
               <Route path="marketplace" element={<Marketplace />} />
               <Route path="listings/:id" element={<ListingDetails />} />
@@ -119,6 +129,7 @@ export default function App() {
               <Route element={<ProtectedRoute roles={['farmer', 'buyer']} />}>
                 <Route path="offers" element={<Offers />} />
                 <Route path="trades" element={<Trades />} />
+                <Route path="wallet" element={<Wallet />} />
                 <Route path="messages" element={<Messages />} />
                 <Route path="messages/:id" element={<Messages />} />
               </Route>
@@ -139,6 +150,7 @@ export default function App() {
                 <Route path="crops" element={<AdminCrops />} />
                 <Route path="market-prices" element={<AdminMarketPrices />} />
                 <Route path="trades" element={<AdminTrades />} />
+                <Route path="wallet" element={<AdminWallet />} />
                 <Route path="bookings" element={<AdminBookings />} />
                 <Route path="complaints" element={<AdminComplaints />} />
                 <Route path="reviews" element={<AdminReviews />} />

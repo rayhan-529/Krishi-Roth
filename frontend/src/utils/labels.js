@@ -24,7 +24,7 @@ const L = {
     withdrawn: ['প্রত্যাহার করা', 'Withdrawn'], expired: ['মেয়াদ শেষ', 'Expired'],
   },
   tradeStatus: {
-    payment_pending: ['মূল্য পরিশোধ বাকি', 'Payment Pending'], payment_confirmed: ['মূল্য পাওয়া গেছে', 'Payment Confirmed'],
+    payment_pending: ['মূল্য পরিশোধ বাকি', 'Payment Pending'], payment_confirmed: ['টাকা সেফ ট্রেডে জমা', 'Paid into escrow'],
     delivery_pending: ['ডেলিভারি চলছে', 'Delivery Pending'], completed: ['সম্পন্ন', 'Completed'],
     cancelled: ['বাতিল', 'Cancelled'], disputed: ['অভিযোগ চলছে', 'Disputed'],
   },
@@ -62,7 +62,21 @@ const L = {
   paymentMethod: {
     cash: ['নগদ', 'Cash'], bkash: ['বিকাশ', 'bKash'], nagad: ['নগদ (মোবাইল)', 'Nagad'], rocket: ['রকেট', 'Rocket'],
     bank_transfer: ['ব্যাংক ট্রান্সফার', 'Bank transfer'], other: ['অন্যান্য', 'Other'],
+    wallet: ['কৃষি রথ ওয়ালেট (সেফ ট্রেড)', 'Krishi Roth wallet (Safe Trade)'],
   },
+  walletMethod: { bkash: ['বিকাশ', 'bKash'], nagad: ['নগদ', 'Nagad'], rocket: ['রকেট', 'Rocket'] },
+  escrowStatus: {
+    none: ['সেফ ট্রেড নয়', 'No escrow'], held: ['টাকা নিরাপদে জমা', 'Held in escrow'],
+    released: ['কৃষককে দেওয়া হয়েছে', 'Released to farmer'], refunded: ['ক্রেতাকে ফেরত', 'Refunded to buyer'],
+  },
+  walletTx: {
+    deposit: ['ব্যালেন্স যোগ', 'Balance added'], withdrawal: ['টাকা তোলা', 'Withdrawal'],
+    withdrawal_refund: ['তোলা বাতিল, ফেরত', 'Withdrawal returned'], escrow_hold: ['সেফ ট্রেডে জমা', 'Paid into escrow'],
+    escrow_release: ['কৃষককে পরিশোধ', 'Paid to farmer'], escrow_receive: ['বিক্রির টাকা পেয়েছেন', 'Sale received'],
+    escrow_refund: ['সেফ ট্রেড ফেরত', 'Escrow refund'], adjustment: ['সমন্বয়', 'Adjustment'],
+  },
+  depositStatus: { pending: ['যাচাই চলছে', 'Checking'], approved: ['যোগ হয়েছে', 'Added'], rejected: ['বাতিল', 'Rejected'] },
+  withdrawalStatus: { pending: ['অপেক্ষমাণ', 'Pending'], paid: ['পাঠানো হয়েছে', 'Sent'], rejected: ['বাতিল', 'Rejected'] },
   deliveryMethod: {
     buyer_pickup: ['ক্রেতা নিজে নেবেন', 'Buyer pickup'], farmer_delivery: ['কৃষক পৌঁছে দেবেন', 'Farmer delivers'],
     transport_service: ['পরিবহন সেবা', 'Transport service'],
@@ -94,7 +108,7 @@ export function options(group, lang, only) {
 
 /** Colour family for status badges. */
 export function statusTone(status) {
-  if (['active', 'accepted', 'completed', 'verified', 'approved', 'resolved', 'payment_confirmed', 'ready'].includes(status)) return 'green'
+  if (['active', 'accepted', 'completed', 'verified', 'approved', 'resolved', 'payment_confirmed', 'ready', 'released', 'paid', 'held'].includes(status)) return 'green'
   if (['pending', 'payment_pending', 'in_review', 'planned', 'reserved', 'delivery_pending', 'in_progress', 'harvesting', 'growing', 'open'].includes(status)) return 'amber'
   if (['rejected', 'cancelled', 'disputed', 'removed', 'blocked', 'fraud'].includes(status)) return 'red'
   return 'grey'

@@ -96,7 +96,6 @@ export default function Harvests() {
     <div className="page">
       <PageHeader
         title={tr('ফসল ব্যবস্থাপনা', 'Harvest management')}
-        subtitle={tr('রোপণ থেকে কাটা পর্যন্ত প্রতিটি ফসলের হিসাব', 'Track each crop from planting to harvest')}
         actions={<button type="button" className="btn btn-primary" onClick={() => setEditing('new')}><Icon name="plus" size={18} /> {tr('নতুন রেকর্ড', 'New record')}</button>}
       />
       <Tabs active={status} onChange={(s) => (setStatus(s), setPage(1))} tabs={[{ key: '', label: tr('সব', 'All') }, ...options('harvestStatus', lang).map((o) => ({ key: o.value, label: o.label }))]} />
@@ -138,7 +137,7 @@ export default function Harvests() {
                     {options('harvestStatus', lang).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
                   </select>
                   <button type="button" className="btn btn-sm btn-outline" onClick={() => setEditing(h)}><Icon name="edit" size={15} /></button>
-                  <Link to="/farmer/notebooks" className="btn btn-sm btn-outline" title={tr('খরচের খাতা', 'Expense notebook')}>🧮</Link>
+                  <Link to="/farmer/notebooks" className="btn btn-sm btn-outline" title={tr('খরচের খাতা', 'Expense notebook')}><Icon name="calculator" size={16} /></Link>
                   <ConfirmButton className="btn btn-sm btn-danger-outline" message={tr('এই রেকর্ডটি মুছে ফেলবেন? এর খরচের খাতা থাকবে।', 'Delete this record? Its expense notebooks are kept.')} onConfirm={async () => { const b = await del(`/harvests/${h.id}`); toast.success(b.message); reload() }}>
                     <Icon name="trash" size={15} />
                   </ConfirmButton>

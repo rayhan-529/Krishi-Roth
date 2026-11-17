@@ -21,7 +21,7 @@ export default function BuyerDashboard() {
 
   return (
     <div className="page">
-      <PageHeader title={tr(`স্বাগতম, ${user.name}`, `Welcome, ${user.name}`)} subtitle={tr('সরাসরি কৃষকের কাছ থেকে ফসল কিনুন', 'Buy crops directly from farmers')} />
+      <PageHeader banner title={tr(`স্বাগতম, ${user.name}`, `Welcome, ${user.name}`)} />
       <QuickLinks
         links={[
           ['/marketplace', '🛒', 'ফসল খুঁজুন', 'Browse crops'],

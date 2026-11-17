@@ -117,7 +117,7 @@ export default function AdminReports() {
   const [tab, setTab] = useState('overview')
   return (
     <div className="page">
-      <PageHeader title={tr('রিপোর্ট ও পরিসংখ্যান', 'Reports & statistics')} actions={<button type="button" className="btn btn-outline" onClick={() => window.print()}>🖨️ {tr('প্রিন্ট', 'Print')}</button>} />
+      <PageHeader title={tr('রিপোর্ট ও পরিসংখ্যান', 'Reports & statistics')} actions={<button type="button" className="btn btn-outline" onClick={() => window.print()}><Icon name="printer" size={16} /> {tr('প্রিন্ট', 'Print')}</button>} />
       <Tabs active={tab} onChange={setTab} tabs={[{ key: 'overview', label: tr('বাজার ও সেবা', 'Market & services') }, { key: 'farming', label: tr('ফসল ও খরচ', 'Harvests & costs') }, { key: 'activity', label: tr('কার্যক্রমের লগ', 'Activity log') }]} />
       {tab === 'overview' && <Overview />}
       {tab === 'farming' && <Farming />}

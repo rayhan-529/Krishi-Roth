@@ -8,6 +8,7 @@ import { get, mediaUrl } from '../../services/api'
 import { label, options } from '../../utils/labels'
 import { date, money, num, pick } from '../../utils/format'
 import { EmptyState, ErrorBox, Loader, PageHeader, Pagination, StatusBadge, Tabs } from '../../components/ui'
+import Icon from '../../components/Icon'
 
 export default function Trades() {
   const { user } = useAuth()
@@ -18,7 +19,7 @@ export default function Trades() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('লেনদেনের ইতিহাস', 'Transaction history')} subtitle={tr('প্রতিটি লেনদেনের ধাপ এখানে দেখুন ও হালনাগাদ করুন', 'See and update every step of each trade')} />
+      <PageHeader title={tr('লেনদেনের ইতিহাস', 'Transaction history')} />
       <Tabs active={status} onChange={(s) => (setStatus(s), setPage(1))} tabs={[{ key: '', label: tr('সব', 'All') }, ...options('tradeStatus', lang).map((o) => ({ key: o.value, label: o.label }))]} />
       {loading ? <Loader /> : error ? <ErrorBox error={error} onRetry={reload} /> : data.length === 0 ? (
         <EmptyState icon="🤝" title={tr('কোনো লেনদেন নেই', 'No transactions')} text={tr('প্রস্তাব গৃহীত হলে লেনদেন এখানে দেখা যাবে।', 'Trades appear here when an offer is accepted.')} />
@@ -28,7 +29,7 @@ export default function Trades() {
             const other = user.id === t.buyer_id ? t.farmer_name : t.buyer_name
             return (
               <Link key={t.id} to={`/trades/${t.id}`} className="manage-item link-item">
-                <div className="manage-thumb">{t.cover_image ? <img src={mediaUrl(t.cover_image)} alt="" /> : '🌾'}</div>
+                <div className="manage-thumb">{t.cover_image ? <img src={mediaUrl(t.cover_image)} alt="" /> : <Icon name="wheat" size={26} />}</div>
                 <div className="manage-body">
                   <h3>{pick(t, 'crop', lang)} <small className="muted">#{num(t.id, lang, 0)}</small> <StatusBadge group="tradeStatus" value={t.status} /></h3>
                   <p className="small">

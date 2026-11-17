@@ -13,6 +13,7 @@ const { notify, notifyMany } = require("../services/notificationService");
 const { logActivity } = require("../services/activityService");
 const { revokeAllSessions } = require("../services/tokenService");
 const trades = require("../services/tradeService");
+const wallet = require("../services/walletService");
 const { monthSeries } = require("./dashboardController");
 const { BOOKING_SELECT, BOOKING_FROM, TYPES: BOOKING_TYPES, STATUSES: BOOKING_STATUSES } = require("./bookingController");
 const { TRADE_STATUSES } = require("./tradeController");
@@ -396,7 +397,10 @@ async function tradeList(req, res) {
   send(req, res, { data: rows, meta: { ...meta, summary } });
 }
 
-/** Admin decides a disputed trade: completed or cancelled. */
+/**
+ * Admin decides a disputed trade: completed (escrow paid to the farmer) or
+ * cancelled (escrow refunded to the buyer).
+ */
 async function resolveTrade(req, res) {
   const { to_status: toStatus, note } = req.body;
 
@@ -408,11 +412,13 @@ async function resolveTrade(req, res) {
     }
 
     if (toStatus === "completed") {
-      await trades.changeStatus(conn, trade, "completed", req.user.id, `Admin: ${note}`, ", completed_at = NOW()");
+      await trades.changeStatus(conn, trade, "completed", req.user.id, `Admin: ${note}`, ", completed_at = NOW(), auto_release_at = NULL");
+      await wallet.releaseEscrow(conn, trade, req.user.id, `Admin decision: ${note}`);
       await trades.markListingSoldIfFinished(conn, trade);
     } else {
       await trades.changeStatus(conn, trade, "cancelled", req.user.id, `Admin: ${note}`,
-        ", cancelled_at = NOW(), cancelled_by = ?, cancel_reason = ?", [req.user.id, note]);
+        ", cancelled_at = NOW(), cancelled_by = ?, cancel_reason = ?, auto_release_at = NULL", [req.user.id, note]);
+      await wallet.refundEscrow(conn, trade, req.user.id, `Admin decision: ${note}`);
       await trades.restoreListingQuantity(conn, trade);
     }
 

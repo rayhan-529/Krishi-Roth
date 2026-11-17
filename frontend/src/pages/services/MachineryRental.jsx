@@ -22,7 +22,6 @@ export default function MachineryRental({ type }) {
     <div className="page">
       <PageHeader
         title={isHarvester ? tr('হারভেস্টার ভাড়া', 'Harvester rental') : tr('ট্রাক্টর ভাড়া', 'Tractor rental')}
-        subtitle={isHarvester ? tr('ধান-গম কাটা ও মাড়াইয়ের যন্ত্র বুক করুন', 'Book machines for cutting and threshing') : tr('জমি চাষের জন্য ট্রাক্টর বুক করুন', 'Book tractors for land preparation')}
       />
       <div className="filters">
         <div className="field field-wide">

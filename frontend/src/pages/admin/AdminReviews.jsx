@@ -22,7 +22,7 @@ export default function AdminReviews() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('রিভিউ মডারেশন', 'Review moderation')} subtitle={tr('অশোভন বা মিথ্যা রিভিউ লুকিয়ে রাখুন; লুকানো রিভিউ গড় রেটিংয়ে গণনা হয় না', 'Hide abusive or false reviews; hidden reviews do not count in ratings')} />
+      <PageHeader title={tr('রিভিউ মডারেশন', 'Review moderation')} />
       <Tabs active={tab} onChange={(t) => (setTab(t), setPage(1))} tabs={[{ key: 'visible', label: tr('দৃশ্যমান', 'Visible') }, { key: 'low', label: tr('কম রেটিং (১-২)', 'Low ratings (1-2)') }, { key: 'hidden', label: tr('লুকানো', 'Hidden') }]} />
       <Card>
         {loading ? <Loader /> : error ? <ErrorBox error={error} onRetry={reload} /> : data.length === 0 ? <EmptyState icon="⭐" title={tr('কোনো রিভিউ নেই', 'No reviews')} /> : (

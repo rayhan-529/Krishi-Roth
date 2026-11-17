@@ -124,7 +124,7 @@ export default function ListingDetails() {
         <div>
           <Card padded={false}>
             <div className="gallery">
-              {images.length ? <img src={mediaUrl(images[photo].image_path)} alt={pick(l, 'crop', lang)} /> : <div className="gallery-empty">🌾</div>}
+              {images.length ? <img src={mediaUrl(images[photo].image_path)} alt={pick(l, 'crop', lang)} /> : <div className="gallery-empty"><Icon name="wheat" size={64} /></div>}
             </div>
             {images.length > 1 && (
               <div className="thumbs">

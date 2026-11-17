@@ -13,6 +13,8 @@ router.use("/market-prices", require("./marketPriceRoutes"));
 router.use("/listings", require("./listingRoutes"));
 router.use("/offers", require("./offerRoutes"));
 router.use("/trades", require("./tradeRoutes"));
+router.use("/wallet-sms", require("./walletSmsRoutes"));
+router.use("/wallet", require("./walletRoutes"));
 router.use("/conversations", require("./messageRoutes"));
 router.use("/harvests", require("./harvestRoutes"));
 router.use("/notebooks", require("./notebookRoutes"));

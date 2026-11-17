@@ -11,6 +11,9 @@ import LocationFields from '../../components/LocationFields'
 import ReviewModal from '../../components/ReviewModal'
 import { Alert, Avatar, Card, ErrorBox, Input, Loader, PageHeader, Select, Stars, StatusBadge, SubmitButton, TextArea } from '../../components/ui'
 import { PasswordInput } from '../auth/Login'
+import Icon from '../../components/Icon'
+import PasswordChecklist from '../../components/PasswordChecklist'
+import { isStrongPassword } from '../../utils/password'
 
 function ProfileForm({ profile, onSaved }) {
   const { tr, setLang } = useLang()
@@ -43,7 +46,7 @@ function ProfileForm({ profile, onSaved }) {
         <Input label={tr('পুরো নাম', 'Full name')} required maxLength={100} {...bind('name')} />
         <div className="grid-2">
           <Input label={tr('মোবাইল নম্বর', 'Mobile number')} type="tel" {...bind('phone')} />
-          <Input label={tr('ইমেইল', 'Email')} type="email" {...bind('email')} />
+          <Input label={tr('ইমেইল', 'Email')} type="email" required {...bind('email')} />
         </div>
         <LocationFields districtId={values.district_id} upazila={values.upazila} onDistrict={(v) => set('district_id', v)} onUpazila={(v) => set('upazila', v)} errors={errors} />
         <Input label={tr('ঠিকানা', 'Address')} maxLength={255} {...bind('address')} />
@@ -64,6 +67,10 @@ function PasswordForm() {
 
   async function submit(event) {
     event.preventDefault()
+    if (!isStrongPassword(values.new_password)) {
+      setErrors({ new_password: tr('পাসওয়ার্ডে কমপক্ষে ৬ অক্ষর, একটি অক্ষর, একটি সংখ্যা ও একটি চিহ্ন (@ # $ !) দিন।', 'Use at least 6 characters with a letter, a number and a symbol (@ # $ !).') })
+      return
+    }
     if (values.new_password !== values.confirm) {
       setErrors({ confirm: tr('দুটি পাসওয়ার্ড মিলছে না।', 'The passwords do not match.') })
       return
@@ -86,7 +93,8 @@ function PasswordForm() {
     <Card title={tr('পাসওয়ার্ড পরিবর্তন', 'Change password')}>
       <form onSubmit={submit} className="form" noValidate>
         <PasswordInput label={tr('বর্তমান পাসওয়ার্ড', 'Current password')} autoComplete="current-password" required {...bind('current_password')} />
-        <PasswordInput label={tr('নতুন পাসওয়ার্ড', 'New password')} autoComplete="new-password" hint={tr('কমপক্ষে ৮ অক্ষর', 'At least 8 characters')} required {...bind('new_password')} />
+        <PasswordInput label={tr('নতুন পাসওয়ার্ড', 'New password')} autoComplete="new-password" required {...bind('new_password')} />
+        <PasswordChecklist password={values.new_password} />
         <PasswordInput label={tr('নতুন পাসওয়ার্ড আবার', 'Confirm new password')} autoComplete="new-password" required {...bind('confirm')} />
         <div className="form-actions"><SubmitButton busy={busy}>{tr('পাসওয়ার্ড বদলান', 'Change password')}</SubmitButton></div>
       </form>
@@ -197,7 +205,7 @@ function PendingReviews() {
               <strong>{item.other_name}</strong>
               <small>{item.kind === 'trade' ? `${tr('লেনদেন', 'Trade')}: ${lang === 'en' ? item.title_en : item.title_bn}` : `${tr('বুকিং', 'Booking')}: ${label('bookingType', item.title_en, lang)}`} · {date(item.finished_at, lang)}</small>
             </div>
-            <button type="button" className="btn btn-sm btn-outline" onClick={() => setTarget(item)}>⭐ {tr('রেটিং দিন', 'Rate')}</button>
+            <button type="button" className="btn btn-sm btn-outline" onClick={() => setTarget(item)}><Icon name="star" size={16} /> {tr('রেটিং দিন', 'Rate')}</button>
           </li>
         ))}
       </ul>

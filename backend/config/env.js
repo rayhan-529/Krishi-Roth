@@ -39,6 +39,41 @@ const config = {
   jwt: {
     secret: process.env.JWT_SECRET ?? "",
     expiresIn: read("JWT_EXPIRES_IN", "1d")
+  },
+
+  // Outgoing email (password-reset codes, sign-in links). When SMTP_HOST is
+  // empty the email is printed in the server console instead (development).
+  mail: {
+    host: read("SMTP_HOST"),
+    port: Number(read("SMTP_PORT", "587")) || 587,
+    secure: ["1", "true", "yes"].includes(read("SMTP_SECURE", "false").toLowerCase()),
+    user: read("SMTP_USER"),
+    // Gmail shows App passwords as "abcd efgh ijkl mnop"; the spaces are not part of it.
+    pass: read("SMTP_HOST") === "smtp.gmail.com" ? (process.env.SMTP_PASS ?? "").replace(/\s+/g, "") : process.env.SMTP_PASS ?? "",
+    // Defaults to the SMTP account itself (Gmail always sends from that address).
+    from: read("MAIL_FROM") || (read("SMTP_USER") ? `Krishi Roth <${read("SMTP_USER")}>` : "Krishi Roth <no-reply@krishiroth.local>")
+  },
+
+  // Wallet: the platform's own numbers that users send "Add balance" money to.
+  // Leave a number empty to hide that method.
+  wallet: {
+    numbers: {
+      bkash: read("WALLET_BKASH_NUMBER"),
+      nagad: read("WALLET_NAGAD_NUMBER"),
+      rocket: read("WALLET_ROCKET_NUMBER")
+    },
+    minDeposit: Number(read("WALLET_MIN_DEPOSIT", "50")) || 50,
+    maxDeposit: Number(read("WALLET_MAX_DEPOSIT", "100000")) || 100000,
+    minWithdrawal: Number(read("WALLET_MIN_WITHDRAWAL", "100")) || 100,
+    // Secret key in the SMS-forwarder webhook URL. Empty = automatic SMS verification is off.
+    smsSecret: read("WALLET_SMS_SECRET")
+  },
+
+  // Social sign-in. Leave empty to switch a provider off.
+  social: {
+    googleClientId: read("GOOGLE_CLIENT_ID"),
+    // Apple "Services ID" (e.g. com.example.krishiroth.web)
+    appleClientId: read("APPLE_CLIENT_ID")
   }
 };
 

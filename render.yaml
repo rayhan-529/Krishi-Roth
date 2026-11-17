@@ -43,3 +43,29 @@ services:
         sync: false
       - key: AI_API_KEY
         sync: false
+      # ---- Email (Brevo SMTP): password-reset codes, sign-in links ----
+      # Port 2525 is used because some hosts block 587/465 on free plans.
+      - key: SMTP_HOST
+        value: smtp-relay.brevo.com
+      - key: SMTP_PORT
+        value: "2525"
+      - key: SMTP_SECURE
+        value: "false"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      # ---- Google sign-in (same id as VITE_GOOGLE_CLIENT_ID on Vercel) ----
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      # ---- Wallet / Safe Trade ----
+      - key: WALLET_BKASH_NUMBER
+        sync: false
+      - key: WALLET_NAGAD_NUMBER
+        sync: false
+      - key: WALLET_ROCKET_NUMBER
+        sync: false
+      - key: WALLET_SMS_SECRET
+        generateValue: true

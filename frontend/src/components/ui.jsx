@@ -7,7 +7,7 @@ import { useLang } from '../context/LanguageContext'
 import { mediaUrl } from '../services/api'
 import { label, statusTone } from '../utils/labels'
 import { num } from '../utils/format'
-import Icon from './Icon'
+import Icon, { Glyph } from './Icon'
 
 export function Spinner({ small }) {
   return <span className={`spinner ${small ? 'spinner-sm' : ''}`} aria-hidden="true" />
@@ -59,10 +59,10 @@ export function Alert({ tone = 'info', children }) {
   )
 }
 
-export function EmptyState({ icon = '🌾', title, text, action }) {
+export function EmptyState({ icon = 'wheat', title, text, action }) {
   return (
     <div className="empty">
-      <span className="empty-icon" aria-hidden="true">{icon}</span>
+      <span className="empty-icon" aria-hidden="true"><Glyph value={icon} size={26} /></span>
       <strong>{title}</strong>
       {text && <p>{text}</p>}
       {action}
@@ -70,9 +70,9 @@ export function EmptyState({ icon = '🌾', title, text, action }) {
   )
 }
 
-export function PageHeader({ title, subtitle, actions, back }) {
+export function PageHeader({ title, subtitle, actions, back, banner }) {
   return (
-    <div className="page-header">
+    <div className={`page-header ${banner ? 'banner' : ''}`}>
       <div>
         {back && (
           <Link to={back} className="back-link">
@@ -104,7 +104,7 @@ export function Card({ title, actions, children, className = '', padded = true }
 export function StatCard({ icon, label: text, value, tone = 'green', to, hint }) {
   const body = (
     <>
-      <span className={`stat-icon tone-${tone}`} aria-hidden="true">{icon}</span>
+      <span className={`stat-icon tone-${tone}`} aria-hidden="true"><Glyph value={icon} size={20} /></span>
       <span className="stat-body">
         <small>{text}</small>
         <strong>{value}</strong>
@@ -112,7 +112,7 @@ export function StatCard({ icon, label: text, value, tone = 'green', to, hint })
       </span>
     </>
   )
-  return to ? <Link to={to} className="stat-card">{body}</Link> : <div className="stat-card">{body}</div>
+  return to ? <Link to={to} className={`stat-card stat-${tone}`}>{body}</Link> : <div className={`stat-card stat-${tone}`}>{body}</div>
 }
 
 export function Badge({ tone = 'grey', children }) {
@@ -386,8 +386,8 @@ export function PriceSourceNote() {
     <p className="source-note">
       <Icon name="info" size={14} />{' '}
       {tr(
-        'বাজারদর অ্যাডমিন হাতে লিখে দেন। "নমুনা" চিহ্নিত দাম আসল বাজারদর নয়, শুধু দেখানোর জন্য। এটি সরকারি লাইভ তথ্য নয়; বিক্রির আগে স্থানীয় বাজারে মিলিয়ে নিন।',
-        'Prices are entered by administrators. Prices marked "Sample" are not real market rates. This is not a live government feed; check your local market before selling.',
+        'দাম অ্যাডমিন প্রদত্ত; বিক্রির আগে স্থানীয় বাজারে মিলিয়ে নিন।',
+        'Admin-entered prices; confirm at your local market before selling.',
       )}
     </p>
   )

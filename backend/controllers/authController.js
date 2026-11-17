@@ -12,6 +12,8 @@ const { USER_COLUMNS } = require("../middleware/auth");
 const { issueToken, revokeSession, revokeAllSessions } = require("../services/tokenService");
 const { notify } = require("../services/notificationService");
 const { logActivity } = require("../services/activityService");
+const crypto = require("crypto");
+const { verifyIdToken } = require("../services/socialAuthService");
 
 // Roles a person may choose when registering. Admin is never allowed.
 const REGISTER_ROLES = ["farmer", "buyer", "labour", "harvester_owner", "tractor_owner", "transport_owner"];
@@ -24,8 +26,12 @@ const schemas = {
   register: {
     name: v.string().required().min(2).max(100),
     phone: v.phone().required(),
-    email: v.email(),
-    password: v.string().required(),
+    // Required: needed for password-reset codes and sign-in links.
+    email: v.email().required(),
+    // Not needed when signing up with Google/Apple (provider + id_token).
+    password: v.string(),
+    provider: v.enum(["google", "apple"]),
+    id_token: v.string().max(5000),
     role: v.enum(REGISTER_ROLES).required(),
     district_id: v.id().required(),
     upazila: v.string().max(80),
@@ -64,8 +70,25 @@ function passwordError(problem) {
 async function register(req, res) {
   const data = req.body;
 
-  const problem = checkPasswordStrength(data.password);
-  if (problem) throw ApiError.badRequest(problem.bn, problem.en, { password: problem });
+  // Sign-up with Google/Apple: the verified email from the provider is used
+  // and a random password is stored (the user can set one later via reset).
+  let social = null;
+  if (data.provider || data.id_token) {
+    if (!data.provider || !data.id_token) {
+      throw ApiError.badRequest("লগইন তথ্য অসম্পূর্ণ।", "Sign-in details are incomplete.");
+    }
+    social = await verifyIdToken(data.provider, data.id_token);
+    if (social.email) data.email = social.email;
+    const column = data.provider === "google" ? "google_id" : "apple_id";
+    const [linked] = await db.query(`SELECT id FROM users WHERE ${column} = ? LIMIT 1`, [social.sub]);
+    if (linked.length > 0) {
+      throw new ApiError(409, "এই অ্যাকাউন্ট দিয়ে আগেই নিবন্ধন করা হয়েছে। লগইন করুন।", "This account is already registered. Please log in.");
+    }
+    data.password = crypto.randomBytes(30).toString("base64url");
+  } else {
+    const problem = checkPasswordStrength(data.password);
+    if (problem) throw ApiError.badRequest(problem.bn, problem.en, { password: problem });
+  }
 
   const [taken] = await db.query(
     "SELECT phone, email FROM users WHERE phone = ? OR (email IS NOT NULL AND email = ?)",
@@ -84,9 +107,13 @@ async function register(req, res) {
 
   const passwordHash = await bcrypt.hash(data.password, BCRYPT_ROUNDS);
   const [result] = await db.query(
-    `INSERT INTO users (name, phone, email, password_hash, role, district_id, upazila, preferred_language)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [data.name, data.phone, data.email, passwordHash, data.role, data.district_id, data.upazila, data.preferred_language]
+    `INSERT INTO users (name, phone, email, password_hash, role, district_id, upazila, preferred_language, google_id, apple_id)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      data.name, data.phone, data.email, passwordHash, data.role, data.district_id, data.upazila, data.preferred_language,
+      social && social.provider === "google" ? social.sub : null,
+      social && social.provider === "apple" ? social.sub : null
+    ]
   );
 
   const [rows] = await db.query(`SELECT ${USER_COLUMNS} FROM users u WHERE u.id = ?`, [result.insertId]);

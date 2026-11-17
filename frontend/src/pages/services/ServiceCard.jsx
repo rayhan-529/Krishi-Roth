@@ -4,7 +4,7 @@ import { useLang } from '../../context/LanguageContext'
 import { mediaUrl } from '../../services/api'
 import { label } from '../../utils/labels'
 import { money, num, pick } from '../../utils/format'
-import Icon from '../../components/Icon'
+import Icon, { Glyph } from '../../components/Icon'
 import { Avatar, Badge, Stars, VerifiedBadge } from '../../components/ui'
 
 export default function ServiceCard({ photo, emoji, title, subtitle, price, priceUnit, ownerId, ownerName, ownerPhoto, verification, rating, reviewCount, completedJobs, row, available, details, onBook }) {
@@ -12,7 +12,7 @@ export default function ServiceCard({ photo, emoji, title, subtitle, price, pric
   return (
     <article className="service-card">
       <div className="service-photo">
-        {photo ? <img src={mediaUrl(photo)} alt="" loading="lazy" /> : <span aria-hidden="true">{emoji}</span>}
+        {photo ? <img src={mediaUrl(photo)} alt="" loading="lazy" /> : <Glyph value={emoji} size={40} />}
         {!available && <Badge tone="grey">{tr('এখন ব্যস্ত', 'Busy now')}</Badge>}
       </div>
       <div className="service-body">

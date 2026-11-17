@@ -143,12 +143,12 @@ export default function NotebookEditor() {
     <div className="page">
       <PageHeader
         back="/farmer/notebooks"
-        title={`📒 ${nb.title}`}
+        title={nb.title}
         subtitle={[pick(nb, 'harvest_crop', lang) || pick(nb, 'crop', lang), nb.season && label('season', nb.season, lang), nb.year && num(nb.year, lang, 0)].filter(Boolean).join(' · ')}
         actions={
           <>
             <button type="button" className="btn btn-outline" onClick={() => setEditInfo(true)}><Icon name="edit" size={16} /> {tr('খাতার তথ্য', 'Details')}</button>
-            <button type="button" className="btn btn-outline" onClick={() => window.print()}>🖨️ {tr('প্রিন্ট', 'Print')}</button>
+            <button type="button" className="btn btn-outline" onClick={() => window.print()}><Icon name="printer" size={16} /> {tr('প্রিন্ট', 'Print')}</button>
           </>
         }
       />

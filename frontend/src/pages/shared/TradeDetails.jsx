@@ -10,6 +10,7 @@ import { label, options } from '../../utils/labels'
 import { date, dateTime, money, num, pick } from '../../utils/format'
 import ReviewModal from '../../components/ReviewModal'
 import { Alert, Avatar, Card, ConfirmButton, ErrorBox, Input, Loader, PageHeader, Select, Stars, StatusBadge, SubmitButton, VerifiedBadge } from '../../components/ui'
+import Icon from '../../components/Icon'
 
 const STEPS = ['payment_pending', 'payment_confirmed', 'delivery_pending', 'completed']
 
@@ -28,6 +29,75 @@ function Progress({ status }) {
   )
 }
 
+/** Where the money is right now, in one glance. */
+function SafeTradeBox({ trade: t, isBuyer, isFarmer }) {
+  const { lang, tr } = useLang()
+  const amount = money(t.escrow_amount || t.total_amount, lang)
+  let text
+  if (t.escrow_status === 'held') {
+    text = isFarmer
+      ? tr(`ক্রেতার ${amount} কৃষি রথে নিরাপদে জমা আছে। ক্রেতা ফসল পেয়েছেন নিশ্চিত করলে টাকা আপনার ওয়ালেটে আসবে।`, `The buyer's ${amount} is held safely by Krishi Roth. It reaches your wallet when the buyer confirms receipt.`)
+      : tr(`আপনার ${amount} কৃষি রথে নিরাপদে জমা আছে। ফসল হাতে পেয়ে নিশ্চিত করলে তবেই কৃষক টাকা পাবেন।`, `Your ${amount} is held safely by Krishi Roth. The farmer is paid only after you confirm receipt.`)
+  } else if (t.escrow_status === 'released') {
+    text = tr(`${amount} কৃষকের ওয়ালেটে দেওয়া হয়েছে।`, `${amount} was paid to the farmer's wallet.`)
+  } else if (t.escrow_status === 'refunded') {
+    text = tr(`${amount} ক্রেতার ওয়ালেটে ফেরত দেওয়া হয়েছে।`, `${amount} was refunded to the buyer's wallet.`)
+  } else if (t.status === 'payment_pending') {
+    text = isBuyer
+      ? tr('ওয়ালেট থেকে টাকা দিন। টাকা কৃষি রথে জমা থাকবে, ফসল পেলে তবেই কৃষক পাবেন।', 'Pay from your wallet. Krishi Roth holds the money and pays the farmer only after you receive the crop.')
+      : tr('ক্রেতার টাকা জমা দেওয়ার অপেক্ষায়।', 'Waiting for the buyer to pay into Safe Trade.')
+  } else {
+    return null // older trade paid outside Krishi Roth
+  }
+  return (
+    <div className={`safe-trade-box escrow-${t.escrow_status}`}>
+      <span className="safe-trade-icon"><Icon name="shield" size={22} /></span>
+      <div>
+        <strong>{tr('সেফ ট্রেড', 'Safe Trade')} · {label('escrowStatus', t.escrow_status, lang)}</strong>
+        <p>{text}</p>
+      </div>
+    </div>
+  )
+}
+
+/** Buyer's payment step: shows the wallet balance and pays the trade into escrow. */
+function PayFromWallet({ trade: t, busy, onPay }) {
+  const { lang, tr } = useLang()
+  const { data, loading } = useFetch(() => get('/wallet'), [])
+  if (loading || !data) return <Loader inline />
+  const available = data.wallet.available
+  const total = Number(t.total_amount)
+  const enough = available >= total
+  return (
+    <div className="pay-wallet">
+      <div className="pay-wallet-row">
+        <span>{tr('দিতে হবে', 'To pay')}</span><strong>{money(total, lang)}</strong>
+      </div>
+      <div className="pay-wallet-row">
+        <span>{tr('ওয়ালেটে আছে', 'Wallet balance')}</span><strong className={enough ? 'text-green' : 'text-red'}>{money(available, lang)}</strong>
+      </div>
+      {enough ? (
+        <ConfirmButton
+          className="btn btn-primary btn-block"
+          danger={false}
+          disabled={busy}
+          title={tr('সেফ ট্রেডে টাকা দিন', 'Pay into Safe Trade')}
+          message={tr(`${money(total, lang)} আপনার ওয়ালেট থেকে কেটে কৃষি রথে জমা থাকবে। ফসল পেয়ে নিশ্চিত করলে কৃষক পাবেন।`, `${money(total, lang)} will be taken from your wallet and held by Krishi Roth. The farmer gets it after you confirm receipt.`)}
+          confirmText={tr('হ্যাঁ, টাকা দিন', 'Yes, pay')}
+          onConfirm={onPay}
+        >
+          <Icon name="shield" size={18} /> {tr(`${money(total, lang)} সেফ ট্রেডে দিন`, `Pay ${money(total, lang)} with Safe Trade`)}
+        </ConfirmButton>
+      ) : (
+        <>
+          <Alert tone="warning">{tr(`আরও ${money(total - available, lang)} দরকার।`, `You need ${money(total - available, lang)} more.`)}</Alert>
+          <Link to="/wallet" className="btn btn-primary btn-block"><Icon name="plus" size={18} /> {tr('ব্যালেন্স যোগ করুন', 'Add balance')}</Link>
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function TradeDetails() {
   const { id } = useParams()
   const { user } = useAuth()
@@ -36,7 +106,6 @@ export default function TradeDetails() {
   const { data: t, loading, error, reload, setData } = useFetch(() => get(`/trades/${id}`), [id])
   const [busy, setBusy] = useState(false)
   const [reviewing, setReviewing] = useState(false)
-  const pay = useForm({ payment_method: 'bkash', payment_reference: '' })
   const ship = useForm({ delivery_method: 'farmer_delivery', delivery_address: '', expected_delivery_date: '' })
 
   async function act(action, extra = {}) {
@@ -66,44 +135,15 @@ export default function TradeDetails() {
   return (
     <div className="page">
       <PageHeader back={user.role === 'admin' ? '/admin/trades' : '/trades'} title={`${tr('লেনদেন', 'Trade')} #${num(t.id, lang, 0)}: ${pick(t, 'crop', lang)}`} subtitle={<StatusBadge group="tradeStatus" value={t.status} />} />
-      <Alert tone="info">
-        {tr('কৃষি রথ নিজে কোনো টাকা লেনদেন করে না। মূল্য সরাসরি কৃষককে দিন (নগদ, বিকাশ, নগদ, রকেট বা ব্যাংক) এবং এখানে তথ্য দিন।', 'Krishi Roth does not handle money. Pay the farmer directly (cash, bKash, Nagad, Rocket or bank) and record it here.')}
-      </Alert>
+      <SafeTradeBox trade={t} isBuyer={isBuyer} isFarmer={isFarmer} />
       {!['cancelled', 'disputed'].includes(t.status) && <Progress status={t.status} />}
 
       <div className="two-col">
         <div>
           <Card title={tr('পরবর্তী ধাপ', 'Next step')}>
-            {t.status === 'payment_pending' && isBuyer && (
-              <form
-                className="form"
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  act('mark_paid', pay.values).catch(() => {})
-                }}
-              >
-                {t.payment_marked_at && <Alert tone="success">{tr('আপনি মূল্য পরিশোধের তথ্য দিয়েছেন। কৃষকের নিশ্চিতকরণের অপেক্ষায়।', 'You reported the payment. Waiting for the farmer to confirm.')}</Alert>}
-                <p>{tr('কৃষককে মূল্য পরিশোধ করে নিচে তথ্য দিন।', 'Pay the farmer, then record it below.')} <strong>{money(t.total_amount, lang)}</strong></p>
-                <div className="grid-2">
-                  <Select label={tr('কীভাবে দিলেন', 'Paid by')} options={options('paymentMethod', lang)} {...pay.bind('payment_method')} />
-                  <Input label={tr('ট্রানজেকশন আইডি (ঐচ্ছিক)', 'Transaction ID (optional)')} maxLength={100} {...pay.bind('payment_reference')} />
-                </div>
-                <SubmitButton busy={busy}>{t.payment_marked_at ? tr('তথ্য হালনাগাদ করুন', 'Update payment info') : tr('মূল্য পরিশোধ করেছি', 'I have paid')}</SubmitButton>
-              </form>
-            )}
+            {t.status === 'payment_pending' && isBuyer && <PayFromWallet trade={t} busy={busy} onPay={() => act('pay_escrow')} />}
             {t.status === 'payment_pending' && isFarmer && (
-              <>
-                {t.payment_marked_at ? (
-                  <Alert tone="success">
-                    {tr('ক্রেতা জানিয়েছেন মূল্য পরিশোধ করেছেন', 'The buyer reported payment')}: {label('paymentMethod', t.payment_method, lang)} {t.payment_reference && `(${t.payment_reference})`}
-                  </Alert>
-                ) : (
-                  <p className="muted">{tr('ক্রেতার মূল্য পরিশোধের অপেক্ষায়। নগদে নিলে টাকা পেয়ে নিশ্চিত করুন।', 'Waiting for the buyer to pay. If paid in cash, confirm once you receive it.')}</p>
-                )}
-                <ConfirmButton className="btn btn-primary" danger={false} message={tr(`আপনি কি ${money(t.total_amount, lang)} পেয়েছেন?`, `Did you receive ${money(t.total_amount, lang)}?`)} onConfirm={() => act('confirm_payment', { payment_method: t.payment_method || 'cash' })}>
-                  {tr('মূল্য পেয়েছি', 'I received the payment')}
-                </ConfirmButton>
-              </>
+              <p className="muted">{tr('ক্রেতা সেফ ট্রেডে টাকা জমা দিলে আপনাকে জানানো হবে। টাকা জমা হওয়ার আগে ফসল পাঠাবেন না।', 'You will be notified when the buyer pays into Safe Trade. Do not send the crop before that.')}</p>
             )}
             {t.status === 'payment_confirmed' && isFarmer && (
               <form className="form" onSubmit={(e) => { e.preventDefault(); act('start_delivery', ship.values).catch(() => {}) }}>
@@ -119,15 +159,18 @@ export default function TradeDetails() {
             )}
             {t.status === 'payment_confirmed' && isBuyer && <p className="muted">{tr('কৃষক ফসল পাঠানোর প্রস্তুতি নিচ্ছেন।', 'The farmer is preparing the delivery.')}</p>}
             {t.status === 'delivery_pending' && isBuyer && (
-              <ConfirmButton className="btn btn-primary" danger={false} message={tr('আপনি কি ফসল ঠিকঠাক পেয়েছেন? নিশ্চিত করলে লেনদেন সম্পন্ন হবে।', 'Did you receive the crop in good order? Confirming completes the trade.')} onConfirm={() => act('confirm_receipt')}>
-                {tr('ফসল পেয়েছি', 'I received the crop')}
+              <ConfirmButton className="btn btn-primary" danger={false} message={tr(`আপনি কি ফসল ঠিকঠাক পেয়েছেন? নিশ্চিত করলে সেফ ট্রেডের ${money(t.escrow_amount || t.total_amount, lang)} কৃষককে দেওয়া হবে। এটা আর ফেরানো যাবে না।`, `Did you receive the crop in good order? Confirming pays ${money(t.escrow_amount || t.total_amount, lang)} from Safe Trade to the farmer. This cannot be undone.`)} onConfirm={() => act('confirm_receipt')}>
+                {tr('ফসল পেয়েছি, টাকা ছেড়ে দিন', 'I received the crop, release payment')}
               </ConfirmButton>
+            )}
+            {t.status === 'delivery_pending' && isBuyer && t.auto_release_at && (
+              <p className="small muted mt">{tr(`সমস্যা থাকলে ${dateTime(t.auto_release_at, lang)}-এর আগে অভিযোগ করুন। তা না হলে টাকা স্বয়ংক্রিয়ভাবে কৃষকের কাছে যাবে।`, `If something is wrong, report it before ${dateTime(t.auto_release_at, lang)}. Otherwise the money is released to the farmer automatically.`)}</p>
             )}
             {t.status === 'delivery_pending' && isFarmer && <p className="muted">{tr('ক্রেতার প্রাপ্তি নিশ্চিতকরণের অপেক্ষায়।', 'Waiting for the buyer to confirm receipt.')}</p>}
             {t.status === 'completed' && (
               <>
                 <Alert tone="success">{tr('লেনদেন সম্পন্ন হয়েছে।', 'This trade is complete.')}</Alert>
-                {t.can_review && <button type="button" className="btn btn-primary" onClick={() => setReviewing(true)}>⭐ {tr(`${other.name}-কে রেটিং দিন`, `Rate ${other.name}`)}</button>}
+                {t.can_review && <button type="button" className="btn btn-primary" onClick={() => setReviewing(true)}><Icon name="star" size={16} /> {tr(`${other.name}-কে রেটিং দিন`, `Rate ${other.name}`)}</button>}
               </>
             )}
             {t.status === 'cancelled' && <Alert tone="warning">{tr('লেনদেনটি বাতিল হয়েছে', 'This trade was cancelled')}: {t.cancel_reason}</Alert>}
@@ -135,8 +178,8 @@ export default function TradeDetails() {
 
             {(isBuyer || isFarmer) && (
               <div className="form-actions start">
-                {t.status === 'payment_pending' && (
-                  <ConfirmButton className="btn btn-sm btn-danger-outline" title={tr('লেনদেন বাতিল', 'Cancel trade')} message={tr('লেনদেন বাতিল করবেন? ফসলের পরিমাণ আবার বিজ্ঞাপনে ফিরে যাবে।', 'Cancel this trade? The quantity goes back to the listing.')} reasonLabel={tr('কারণ', 'Reason')} onConfirm={(reason) => act('cancel', { reason })}>
+                {(t.status === 'payment_pending' || (t.status === 'payment_confirmed' && isFarmer)) && (
+                  <ConfirmButton className="btn btn-sm btn-danger-outline" title={tr('লেনদেন বাতিল', 'Cancel trade')} message={t.escrow_status === 'held' ? tr('লেনদেন বাতিল করবেন? ক্রেতার জমা দেওয়া টাকা তাঁর ওয়ালেটে ফেরত যাবে।', "Cancel this trade? The buyer's money goes back to their wallet.") : tr('লেনদেন বাতিল করবেন? ফসলের পরিমাণ আবার বিজ্ঞাপনে ফিরে যাবে।', 'Cancel this trade? The quantity goes back to the listing.')} reasonLabel={tr('কারণ', 'Reason')} onConfirm={(reason) => act('cancel', { reason })}>
                     {tr('লেনদেন বাতিল', 'Cancel trade')}
                   </ConfirmButton>
                 )}
@@ -182,7 +225,7 @@ export default function TradeDetails() {
                 <Avatar src={other.photo} name={other.name} size={48} />
                 <span><strong>{other.name}</strong> <VerifiedBadge status={other.verification} /></span>
               </Link>
-              <p className="mt">📞 <a href={`tel:${other.phone}`}>{other.phone || '—'}</a>{other.email && <><br />✉️ {other.email}</>}</p>
+              <p className="mt"><Icon name="phone" size={15} /> <a href={`tel:${other.phone}`}>{other.phone || '—'}</a>{other.email && <><br /><Icon name="mail" size={15} /> {other.email}</>}</p>
             </Card>
           )}
           {t.reviews.length > 0 && (

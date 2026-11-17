@@ -29,7 +29,7 @@ export default function ProviderDashboard() {
 
   return (
     <div className="page">
-      <PageHeader title={tr(title[0], title[1])} subtitle={tr(`স্বাগতম, ${user.name}`, `Welcome, ${user.name}`)} actions={<Link to="/provider/services" className="btn btn-primary">{tr('আমার সেবা পরিচালনা', 'Manage my services')}</Link>} />
+      <PageHeader banner title={tr(title[0], title[1])} subtitle={tr(`স্বাগতম, ${user.name}`, `Welcome, ${user.name}`)} actions={<Link to="/provider/services" className="btn btn-primary">{tr('আমার সেবা পরিচালনা', 'Manage my services')}</Link>} />
       {setupNeeded && <Alert tone="warning">{setupNeeded} <Link to="/provider/services">{tr('এখনই করুন', 'Do it now')} →</Link></Alert>}
       <div className="stats-grid">
         <StatCard icon="📥" tone="amber" label={tr('নতুন অনুরোধ', 'New requests')} value={num(c.pending, lang)} to="/bookings?as=provider&status=pending" />

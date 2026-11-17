@@ -10,18 +10,24 @@ import { useLang } from '../context/LanguageContext'
 import { get, patch } from '../services/api'
 import { label } from '../utils/labels'
 import { num } from '../utils/format'
-import { HOME_BY_ROLE, menuFor } from '../utils/nav'
+import { GUEST_TOP, HOME_BY_ROLE, NAV_ICON, menuFor } from '../utils/nav'
 import Icon from './Icon'
 import { Avatar, Loader } from './ui'
 
+export function BrandMark({ size = 34 }) {
+  return (
+    <span className="brand-mark" style={{ width: size, height: size }} aria-hidden="true">
+      <Icon name="wheat" size={Math.round(size * 0.58)} />
+    </span>
+  )
+}
+
 function Brand() {
+  const { tr } = useLang()
   return (
     <Link to="/" className="brand" aria-label="Krishi Roth">
-      <span className="brand-mark" aria-hidden="true">🌾</span>
-      <span>
-        <strong>কৃষি <b>রথ</b></strong>
-        <small>Krishi Roth</small>
-      </span>
+      <BrandMark />
+      <strong>{tr('কৃষি রথ', 'Krishi Roth')}</strong>
     </Link>
   )
 }
@@ -109,13 +115,15 @@ function AccountMenu() {
   )
 }
 
-function MenuLinks({ onNavigate }) {
+function MenuLinks({ onNavigate, top }) {
   const { user } = useAuth()
   const { tr } = useLang()
   const roots = ['/', '/farmer', '/buyer', '/provider', '/admin']
-  return menuFor(user).map(([path, bn, en]) => (
+  const items = top ? menuFor(user).filter(([path]) => GUEST_TOP.includes(path)) : menuFor(user)
+  return items.map(([path, bn, en]) => (
     <NavLink key={path} to={path} end={roots.includes(path)} onClick={onNavigate}>
-      {tr(bn, en)}
+      {!top && <Icon name={NAV_ICON[path] || 'chevronRight'} size={18} />}
+      <span>{tr(bn, en)}</span>
     </NavLink>
   ))
 }
@@ -144,7 +152,7 @@ export default function Layout() {
           <Brand />
           {!user && (
             <nav className="top-nav" aria-label={tr('প্রধান মেনু', 'Main menu')}>
-              <MenuLinks />
+              <MenuLinks top />
             </nav>
           )}
           <div className="topbar-actions">
@@ -185,14 +193,14 @@ export default function Layout() {
 
       <footer className="footer">
         <div className="footer-inner">
-          <Brand />
-          <p>{tr('বাংলার কৃষক, বাংলার শক্তি। কৃষকের পাশে, সবসময়।', 'Farmers are the strength of Bangladesh.')}</p>
+          <small>© {new Date().getFullYear()} {tr('কৃষি রথ', 'Krishi Roth')}</small>
           <nav>
             <Link to="/about">{tr('আমাদের সম্পর্কে', 'About')}</Link>
             <Link to="/market-prices">{tr('বাজারদর', 'Market prices')}</Link>
             <Link to="/marketplace">{tr('ফসলের বাজার', 'Marketplace')}</Link>
+            <Link to="/privacy">{tr('গোপনীয়তা নীতি', 'Privacy')}</Link>
+            <Link to="/terms">{tr('শর্তাবলি', 'Terms')}</Link>
           </nav>
-          <small>© {new Date().getFullYear()} {tr('কৃষি রথ', 'Krishi Roth')}</small>
         </div>
       </footer>
     </div>

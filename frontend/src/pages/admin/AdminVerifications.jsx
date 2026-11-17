@@ -32,7 +32,7 @@ export default function AdminVerifications() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('যাচাই ব্যবস্থাপনা', 'Verification management')} subtitle={tr('ডকুমেন্টগুলো গোপন; শুধু অ্যাডমিন দেখতে পারেন', 'Documents are private and visible only to admins')} />
+      <PageHeader title={tr('যাচাই ব্যবস্থাপনা', 'Verification management')} />
       <Tabs active={status} onChange={(s) => (setStatus(s), setPage(1))} tabs={[...options('verification', lang, ['pending', 'approved', 'rejected']).map((o) => ({ key: o.value, label: o.label })), { key: '', label: tr('সব', 'All') }]} />
       <Card padded={false}>
         {loading ? <Loader /> : error ? <div className="card-pad"><ErrorBox error={error} onRetry={reload} /></div> : data.length === 0 ? <EmptyState icon="🛡️" title={tr('কোনো আবেদন নেই', 'No requests')} /> : (

@@ -31,6 +31,7 @@ export const MENUS = {
     ['/farmer/listings', 'আমার ফসল', 'My Crops'],
     ['/offers', 'ক্রয় প্রস্তাব', 'Offers'],
     ['/trades', 'লেনদেন', 'Transactions'],
+    ['/wallet', 'ওয়ালেট', 'Wallet'],
     ['/farmer/harvests', 'ফসল ব্যবস্থাপনা', 'Harvests'],
     ['/farmer/notebooks', 'খরচের খাতা', 'Expense Notebook'],
     ['/bookings', 'বুকিং', 'Bookings'],
@@ -42,6 +43,7 @@ export const MENUS = {
     ['/marketplace', 'ফসলের বাজার', 'Marketplace'],
     ['/offers', 'আমার প্রস্তাব', 'My Offers'],
     ['/trades', 'লেনদেন', 'Transactions'],
+    ['/wallet', 'ওয়ালেট', 'Wallet'],
     ['/messages', 'বার্তা', 'Messages'],
     ['/market-prices', 'বাজারদর', 'Market Prices'],
     ['/services/transport', 'পরিবহন', 'Transport'],
@@ -62,6 +64,7 @@ export const MENUS = {
     ['/admin/crops', 'ফসল ও বিজ্ঞাপন', 'Crops & Listings'],
     ['/admin/market-prices', 'বাজারদর', 'Market Prices'],
     ['/admin/trades', 'লেনদেন', 'Transactions'],
+    ['/admin/wallet', 'ওয়ালেট ও সেফ ট্রেড', 'Wallet & Safe Trade'],
     ['/admin/bookings', 'বুকিং', 'Bookings'],
     ['/admin/complaints', 'অভিযোগ', 'Complaints'],
     ['/admin/reviews', 'রিভিউ', 'Reviews'],
@@ -76,3 +79,43 @@ export function menuFor(user) {
   if (PROVIDER_ROLES.includes(user.role)) return MENUS.provider
   return MENUS[user.role] || MENUS.guest
 }
+
+/** Sidebar icon for each menu path (see components/Icon.jsx). */
+export const NAV_ICON = {
+  '/': 'home',
+  '/farmer': 'grid',
+  '/buyer': 'grid',
+  '/provider': 'grid',
+  '/admin': 'grid',
+  '/farmer/listings': 'tag',
+  '/offers': 'inbox',
+  '/trades': 'handshake',
+  '/wallet': 'wallet',
+  '/admin/wallet': 'wallet',
+  '/farmer/harvests': 'sprout',
+  '/farmer/notebooks': 'book',
+  '/bookings': 'calendar',
+  '/messages': 'message',
+  '/market-prices': 'trend',
+  '/marketplace': 'store',
+  '/services/labour': 'users',
+  '/services/harvester': 'wheat',
+  '/services/tractor': 'tractor',
+  '/services/transport': 'truck',
+  '/chatbot': 'sparkle',
+  '/about': 'info',
+  '/provider/services': 'wrench',
+  '/admin/users': 'users',
+  '/admin/verifications': 'shield',
+  '/admin/crops': 'wheat',
+  '/admin/market-prices': 'trend',
+  '/admin/trades': 'handshake',
+  '/admin/bookings': 'calendar',
+  '/admin/complaints': 'alert',
+  '/admin/reviews': 'star',
+  '/admin/announcements': 'megaphone',
+  '/admin/reports': 'file',
+}
+
+/** Short top-bar links for visitors; the rest stay in the drawer. */
+export const GUEST_TOP = ['/market-prices', '/marketplace', '/services/labour', '/services/transport', '/chatbot']

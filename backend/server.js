@@ -22,6 +22,7 @@ const { apiLimiter } = require("./middleware/rateLimit");
 const { PUBLIC_DIR } = require("./middleware/upload");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 const { startScheduler } = require("./services/reminderService");
+const { runMigrations } = require("./database/migrate");
 const { storageDriver } = require("./services/storageService");
 const { status: aiStatus } = require("./services/aiService");
 const apiRoutes = require("./routes");
@@ -87,5 +88,14 @@ app.listen(config.port, async () => {
 
   const result = await db.checkConnection();
   console.log(result.ok ? result.message : `WARNING: ${result.message}`);
-  if (result.ok) startScheduler();
+  if (!result.ok) return;
+
+  // Add any new tables/columns this version needs (additive only, never deletes data).
+  try {
+    const changes = await runMigrations();
+    if (changes.length) console.log(`Database upgraded: ${changes.join(", ")}`);
+  } catch (error) {
+    console.error("WARNING: database upgrade failed:", error.message);
+  }
+  startScheduler();
 });

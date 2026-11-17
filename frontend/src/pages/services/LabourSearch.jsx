@@ -19,7 +19,7 @@ export default function LabourSearch() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('কৃষি শ্রমিক খুঁজুন', 'Find farm workers')} subtitle={tr('এলাকা ও মজুরি দেখে শ্রমিককে কাজের অনুরোধ পাঠান', 'Compare area and wage, then send a work request')} />
+      <PageHeader title={tr('কৃষি শ্রমিক খুঁজুন', 'Find farm workers')} />
       <div className="filters">
         <div className="field field-wide">
           <label htmlFor="labour-q">{tr('দক্ষতা বা নাম', 'Skill or name')}</label>

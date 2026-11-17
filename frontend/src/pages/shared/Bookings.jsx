@@ -9,6 +9,7 @@ import { label, options } from '../../utils/labels'
 import { date, money, num, pick } from '../../utils/format'
 import { PROVIDER_ROLES } from '../../utils/nav'
 import { EmptyState, ErrorBox, Loader, PageHeader, Pagination, Select, StatusBadge, Tabs } from '../../components/ui'
+import { Glyph } from '../../components/Icon'
 
 export default function Bookings() {
   const { user } = useAuth()
@@ -29,7 +30,7 @@ export default function Bookings() {
 
   return (
     <div className="page">
-      <PageHeader title={isProvider ? tr('বুকিং অনুরোধ', 'Booking requests') : tr('আমার বুকিং', 'My bookings')} subtitle={tr('শ্রমিক, হারভেস্টার, ট্রাক্টর ও পরিবহন বুকিংয়ের ইতিহাস', 'History of labour, harvester, tractor and transport bookings')} />
+      <PageHeader title={isProvider ? tr('বুকিং অনুরোধ', 'Booking requests') : tr('আমার বুকিং', 'My bookings')} />
       <Tabs active={status} onChange={(s) => update({ status: s })} tabs={[{ key: '', label: tr('সব', 'All') }, ...options('bookingStatus', lang).map((o) => ({ key: o.value, label: o.label }))]} />
       {!isProvider && (
         <div className="filters filters-3">
@@ -44,7 +45,7 @@ export default function Bookings() {
             const mine = b.requester_id === user.id
             return (
               <Link key={b.id} to={`/bookings/${b.id}`} className="manage-item link-item">
-                <div className="manage-thumb">{{ labour: '👨‍🌾', harvester: '🌾', tractor: '🚜', transport: '🚚' }[b.booking_type]}</div>
+                <div className="manage-thumb"><Glyph value={{ labour: '👨‍🌾', harvester: '🌾', tractor: '🚜', transport: '🚚' }[b.booking_type]} size={26} /></div>
                 <div className="manage-body">
                   <h3>
                     {label('bookingType', b.booking_type, lang)}{b.machine_name ? `: ${b.machine_name}` : ''}{b.vehicle_name ? `: ${b.vehicle_name}` : ''}{' '}

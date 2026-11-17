@@ -5,6 +5,7 @@
 const express = require("express");
 const c = require("../controllers/adminController");
 const verifications = require("../controllers/verificationController");
+const wallet = require("../controllers/walletController");
 const { authenticate, authorize } = require("../middleware/auth");
 const { validateBody, validateQuery, validateId } = require("../middleware/validate");
 
@@ -41,6 +42,11 @@ router.get("/bookings", validateQuery(c.schemas.bookings), c.bookings);
 router.patch("/bookings/:id/cancel", id, validateBody(c.schemas.bookingCancel), c.cancelBooking);
 
 router.get("/trades", validateQuery(c.schemas.trades), c.tradeList);
+router.get("/wallet", wallet.adminSummary);
+router.get("/wallet/deposits", validateQuery(wallet.schemas.adminList), wallet.adminDeposits);
+router.patch("/wallet/deposits/:id", id, validateBody(wallet.schemas.reviewDeposit), wallet.reviewDeposit);
+router.get("/wallet/withdrawals", validateQuery(wallet.schemas.adminList), wallet.adminWithdrawals);
+router.patch("/wallet/withdrawals/:id", id, validateBody(wallet.schemas.reviewWithdrawal), wallet.reviewWithdrawal);
 router.patch("/trades/:id/resolve", id, validateBody(c.schemas.resolveTrade), c.resolveTrade);
 
 router.get("/complaints", validateQuery(c.schemas.complaints), c.complaints);

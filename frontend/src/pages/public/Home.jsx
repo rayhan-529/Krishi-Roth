@@ -7,20 +7,21 @@ import { label } from '../../utils/labels'
 import { date, money, num, pick } from '../../utils/format'
 import { HOME_BY_ROLE } from '../../utils/nav'
 import { ListingCard } from '../market/Marketplace'
+import Icon from '../../components/Icon'
 import { EmptyState, Loader, PriceSourceNote } from '../../components/ui'
 
 const HERO_PHOTO =
   'https://commons.wikimedia.org/wiki/Special:FilePath/Rice%20harvesting%20by%20farmers%20in%20a%20wetland%20field%2C%20Bangladesh%202026%2002.jpg?width=1200'
 
 const SERVICES = [
-  ['📊', '/market-prices', 'ফসলের বাজারদর', 'Market prices', 'সঠিক দাম জেনে সিদ্ধান্ত নিন', 'Know the price before you sell'],
-  ['🤝', '/marketplace', 'সরাসরি ক্রেতা', 'Sell to buyers', 'মধ্যস্বত্বভোগী ছাড়া ন্যায্য দামে বিক্রি', 'Fair prices without middlemen'],
-  ['🧮', '/farmer/notebooks', 'খরচের খাতা', 'Expense notebook', 'উৎপাদন খরচ ও লাভের হিসাব', 'Track costs and profit'],
-  ['👨‍🌾', '/services/labour', 'শ্রমিক খুঁজুন', 'Find labour', 'এলাকার কৃষি শ্রমিক', 'Farm workers near you'],
-  ['🚜', '/services/harvester', 'হারভেস্টার ও ট্রাক্টর', 'Harvester & tractor', 'যন্ত্র ভাড়া ও বুকিং', 'Rent and book machinery'],
-  ['🚚', '/services/transport', 'ফসল পরিবহন', 'Crop transport', 'ট্রাক, পিকআপ, নৌকা', 'Trucks, pickups, boats'],
-  ['🤖', '/chatbot', 'এআই কৃষি সহায়ক', 'AI farm assistant', 'বাংলায় প্রশ্ন করুন', 'Ask in Bengali'],
-  ['🌱', '/farmer/harvests', 'ফসল ব্যবস্থাপনা', 'Harvest planner', 'রোপণ থেকে কাটা পর্যন্ত', 'From planting to harvest'],
+  ['trend', '/market-prices', 'বাজারদর', 'Market prices'],
+  ['store', '/marketplace', 'ফসল বিক্রি', 'Sell crops'],
+  ['book', '/farmer/notebooks', 'খরচের খাতা', 'Expense book'],
+  ['sprout', '/farmer/harvests', 'ফসল ব্যবস্থাপনা', 'Harvest planner'],
+  ['users', '/services/labour', 'শ্রমিক', 'Labour'],
+  ['tractor', '/services/harvester', 'কৃষিযন্ত্র', 'Machinery'],
+  ['truck', '/services/transport', 'পরিবহন', 'Transport'],
+  ['sparkle', '/chatbot', 'এআই সহায়ক', 'AI assistant'],
 ]
 
 export default function Home() {
@@ -31,65 +32,52 @@ export default function Home() {
   const listings = useFetch(() => get('/listings', { limit: 4 }), [])
   const s = stats.data
 
+  const steps = [
+    [tr('বিজ্ঞাপন দিন', 'List'), tr('ফসল, দাম ও ছবি', 'Crop, price, photos')],
+    [tr('প্রস্তাব নিন', 'Get offers'), tr('গ্রহণ বা বাতিল', 'Accept or decline')],
+    [tr('ডেলিভারি', 'Deliver'), tr('প্রতিটি ধাপ রেকর্ড', 'Every step tracked')],
+    [tr('রেটিং', 'Rate'), tr('উভয় পক্ষের রিভিউ', 'Two-way reviews')],
+  ]
+
   return (
     <div className="home">
-      <section className="hero">
-        <div className="hero-copy">
-          <span className="eyebrow">🌱 {tr('কৃষকের পাশে, বাংলাদেশের কৃষির উন্নয়নে', 'Standing with the farmers of Bangladesh')}</span>
-          <h1>
-            {tr('কৃষকের পরিশ্রমের', 'A fair price for')}
-            <span>{tr('ন্যায্য মূল্য নিশ্চিত করি', "every farmer's hard work")}</span>
-          </h1>
-          <p>
-            {tr(
-              'ফসলের বাজারদর জানুন, সরাসরি ক্রেতার কাছে ফসল বিক্রি করুন, শ্রমিক-যন্ত্র-পরিবহন বুক করুন এবং নিজের খরচ ও লাভের হিসাব রাখুন—সবকিছু এক জায়গায়, সহজ বাংলায়।',
-              'Check market prices, sell directly to buyers, book labour, machinery and transport, and keep track of your costs — all in one place.',
-            )}
-          </p>
+      <section className="hero" style={{ '--hero-img': `url("${HERO_PHOTO}")` }}>
+        <div className="hero-inner">
+          <span className="eyebrow"><Icon name="sprout" size={15} /> {tr('বাংলাদেশের কৃষকের জন্য', 'Built for Bangladeshi farmers')}</span>
+          <h1>{tr('ফসলের ন্যায্য দাম, এক প্ল্যাটফর্মে', 'Fair prices for every harvest')}</h1>
+          <p>{tr('বাজারদর, সরাসরি বিক্রি আর কৃষিসেবা — সব এক জায়গায়।', 'Prices, direct sales and farm services in one place.')}</p>
           <div className="hero-buttons">
             {user ? (
-              <Link to={HOME_BY_ROLE[user.role]} className="btn btn-primary">{tr('আমার ড্যাশবোর্ড', 'My dashboard')} →</Link>
+              <Link to={HOME_BY_ROLE[user.role]} className="btn btn-gold btn-lg">{tr('ড্যাশবোর্ড', 'Dashboard')} <Icon name="arrowRight" size={18} /></Link>
             ) : (
-              <Link to="/register" className="btn btn-primary">{tr('বিনামূল্যে নিবন্ধন করুন', 'Register for free')} →</Link>
+              <Link to="/register" className="btn btn-gold btn-lg">{tr('শুরু করুন', 'Get started')} <Icon name="arrowRight" size={18} /></Link>
             )}
-            <Link to="/market-prices" className="btn btn-outline">📊 {tr('আজকের বাজারদর', "Today's prices")}</Link>
+            <Link to="/market-prices" className="btn btn-glass btn-lg">{tr('আজকের বাজারদর', "Today's prices")}</Link>
           </div>
-          <ul className="trust">
-            <li>✓ {tr('সহজ বাংলা', 'Simple Bengali')}</li>
-            <li>✓ {tr('যাচাইকৃত ব্যবহারকারী', 'Verified users')}</li>
-            <li>✓ {tr('নিরাপদ লেনদেন ধাপ', 'Step-by-step safe trade')}</li>
-          </ul>
         </div>
-        <figure className="hero-photo">
-          <img src={HERO_PHOTO} alt={tr('বাংলাদেশের হাওর অঞ্চলে কৃষকেরা ধান কাটছেন', 'Farmers harvesting rice in a wetland field in Bangladesh')} loading="eager" />
-          <figcaption>
-            {tr('ছবি', 'Photo')}:{' '}
-            <a href="https://commons.wikimedia.org/wiki/File:Rice_harvesting_by_farmers_in_a_wetland_field,_Bangladesh_2026_02.jpg" target="_blank" rel="noreferrer">
-              A S M Jobaer / Wikimedia Commons
-            </a>
-            , CC BY-SA 4.0
-          </figcaption>
-        </figure>
+        <a className="hero-credit" href="https://commons.wikimedia.org/wiki/File:Rice_harvesting_by_farmers_in_a_wetland_field,_Bangladesh_2026_02.jpg" target="_blank" rel="noreferrer">
+          Photo: A S M Jobaer / Wikimedia Commons, CC BY-SA 4.0
+        </a>
       </section>
 
       <div className="page">
         {s && (
           <section className="home-stats" aria-label={tr('প্ল্যাটফর্মের তথ্য', 'Platform numbers')}>
-            <div><strong>{num(s.farmers, lang)}</strong><span>{tr('নিবন্ধিত কৃষক', 'Farmers')}</span></div>
+            <div><strong>{num(s.farmers, lang)}</strong><span>{tr('কৃষক', 'Farmers')}</span></div>
             <div><strong>{num(s.buyers, lang)}</strong><span>{tr('ক্রেতা', 'Buyers')}</span></div>
-            <div><strong>{num(s.active_listings, lang)}</strong><span>{tr('বিক্রির ফসল', 'Crops for sale')}</span></div>
-            <div><strong>{num(s.service_providers, lang)}</strong><span>{tr('সেবাদাতা', 'Service providers')}</span></div>
+            <div><strong>{num(s.active_listings, lang)}</strong><span>{tr('বিক্রির ফসল', 'Live listings')}</span></div>
+            <div><strong>{num(s.service_providers, lang)}</strong><span>{tr('সেবাদাতা', 'Providers')}</span></div>
           </section>
         )}
 
         <section className="section">
-          <h2 className="section-title">{tr('আমাদের সেবা', 'Our services')}</h2>
+          <h2 className="section-title">{tr('সেবাসমূহ', 'Services')}</h2>
           <div className="service-grid">
-            {SERVICES.map(([icon, to, bn, en, dbn, den]) => (
+            {SERVICES.map(([icon, to, bn, en]) => (
               <Link key={to} to={to} className="service-tile">
-                <span aria-hidden="true">{icon}</span>
+                <span className="service-tile-icon"><Icon name={icon} size={22} /></span>
                 <strong>{tr(bn, en)}</strong>
-                <small>{tr(dbn, den)}</small>
+                <Icon name="chevronRight" size={16} className="service-tile-arrow" />
               </Link>
             ))}
           </div>
@@ -98,13 +86,13 @@ export default function Home() {
         <section className="section two-col even">
           <div className="card">
             <div className="card-head">
-              <h2>📊 {tr('সর্বশেষ বাজারদর', 'Latest market prices')}</h2>
-              <Link to="/market-prices">{tr('সব দেখুন', 'View all')} →</Link>
+              <h2>{tr('সর্বশেষ বাজারদর', 'Latest prices')}</h2>
+              <Link to="/market-prices" className="card-link">{tr('সব দেখুন', 'View all')}</Link>
             </div>
             {prices.loading ? (
               <Loader inline />
             ) : !prices.data || prices.data.length === 0 ? (
-              <EmptyState icon="📊" title={tr('এখনো বাজারদর যোগ করা হয়নি', 'No market prices yet')} text={tr('অ্যাডমিন বাজারদর যোগ করলে এখানে দেখা যাবে।', 'Prices will appear here once an administrator adds them.')} />
+              <EmptyState icon="trend" title={tr('এখনো বাজারদর নেই', 'No prices yet')} />
             ) : (
               <ul className="price-list">
                 {prices.data.map((p) => (
@@ -123,13 +111,13 @@ export default function Home() {
 
           <div className="card">
             <div className="card-head">
-              <h2>🌾 {tr('নতুন ফসল বিক্রির জন্য', 'New crops for sale')}</h2>
-              <Link to="/marketplace">{tr('বাজারে যান', 'Open marketplace')} →</Link>
+              <h2>{tr('নতুন ফসল', 'New listings')}</h2>
+              <Link to="/marketplace" className="card-link">{tr('সব দেখুন', 'View all')}</Link>
             </div>
             {listings.loading ? (
               <Loader inline />
             ) : !listings.data || listings.data.length === 0 ? (
-              <EmptyState title={tr('এখনো কোনো ফসলের বিজ্ঞাপন নেই', 'No crops listed yet')} text={tr('কৃষক হিসেবে নিবন্ধন করে প্রথম বিজ্ঞাপন দিন।', 'Register as a farmer and post the first listing.')} />
+              <EmptyState title={tr('এখনো কোনো বিজ্ঞাপন নেই', 'No listings yet')} />
             ) : (
               <div className="mini-listings">
                 {listings.data.map((l) => <ListingCard key={l.id} listing={l} compact />)}
@@ -139,12 +127,11 @@ export default function Home() {
         </section>
 
         <section className="section steps">
-          <h2 className="section-title">{tr('কীভাবে নিরাপদে বিক্রি করবেন', 'How safe selling works')}</h2>
+          <h2 className="section-title">{tr('কীভাবে কাজ করে', 'How it works')}</h2>
           <ol>
-            <li><strong>{tr('বিজ্ঞাপন দিন', 'List your crop')}</strong><span>{tr('ফসল, পরিমাণ, দাম ও ছবি দিন।', 'Add crop, quantity, price and photos.')}</span></li>
-            <li><strong>{tr('প্রস্তাব পান', 'Get offers')}</strong><span>{tr('ক্রেতারা দাম প্রস্তাব করবেন, আপনি গ্রহণ বা বাতিল করবেন।', 'Buyers make offers; you accept or reject.')}</span></li>
-            <li><strong>{tr('মূল্য ও ডেলিভারি', 'Payment & delivery')}</strong><span>{tr('প্রতিটি ধাপ রেকর্ড থাকে—মূল্য পাওয়া, ফসল পাঠানো, ফসল পাওয়া।', 'Every step is recorded: payment, dispatch, receipt.')}</span></li>
-            <li><strong>{tr('রেটিং দিন', 'Rate each other')}</strong><span>{tr('লেনদেন শেষে একে অপরকে রেটিং দিন।', 'Both sides rate each other after completion.')}</span></li>
+            {steps.map(([title, text]) => (
+              <li key={title}><strong>{title}</strong><span>{text}</span></li>
+            ))}
           </ol>
         </section>
       </div>

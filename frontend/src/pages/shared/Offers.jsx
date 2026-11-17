@@ -29,7 +29,6 @@ export default function Offers() {
     <div className="page">
       <PageHeader
         title={isFarmer ? tr('ক্রয় প্রস্তাব', 'Purchase offers') : tr('আমার প্রস্তাব', 'My offers')}
-        subtitle={isFarmer ? tr('ক্রেতাদের পাঠানো প্রস্তাব গ্রহণ বা বাতিল করুন', 'Accept or reject offers from buyers') : tr('আপনার পাঠানো প্রস্তাবের অবস্থা', 'Status of the offers you sent')}
       />
       <Tabs active={status} onChange={(s) => (setStatus(s), setPage(1))} tabs={[...options('offerStatus', lang).map((o) => ({ key: o.value, label: o.label })), { key: '', label: tr('সব', 'All') }]} />
       {loading ? <Loader /> : error ? <ErrorBox error={error} onRetry={reload} /> : data.length === 0 ? (

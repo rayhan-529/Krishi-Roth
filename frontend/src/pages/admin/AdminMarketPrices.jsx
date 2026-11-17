@@ -71,7 +71,7 @@ export default function AdminMarketPrices() {
     <div className="page">
       <PageHeader
         title={tr('বাজারদর ব্যবস্থাপনা', 'Market price management')}
-        subtitle={tr('যোগ করা দাম "অ্যাডমিন প্রদত্ত" হিসেবে দেখানো হয়। নতুন দাম যোগ করলে সংশ্লিষ্ট কৃষকেরা নোটিফিকেশন পান।', 'Prices are shown as admin-entered. Farmers growing or selling the crop are notified of new prices.')}
+        
         actions={<button type="button" className="btn btn-primary" onClick={() => setEditing('new')}><Icon name="plus" size={18} /> {tr('নতুন দাম', 'Add price')}</button>}
       />
       <div className="filters filters-3">

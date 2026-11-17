@@ -24,6 +24,13 @@ const authLimiter = rateLimit({
   skipSuccessfulRequests: true
 });
 
+/** Emails (reset codes, sign-in links): 5 per 15 minutes per IP. */
+const emailLimiter = rateLimit({
+  ...common,
+  windowMs: 15 * 60 * 1000,
+  limit: 5
+});
+
 /** AI chatbot: 20 messages per 10 minutes per user. */
 const chatbotLimiter = rateLimit({
   ...common,
@@ -39,4 +46,4 @@ const apiLimiter = rateLimit({
   limit: 600
 });
 
-module.exports = { authLimiter, chatbotLimiter, apiLimiter };
+module.exports = { authLimiter, emailLimiter, chatbotLimiter, apiLimiter };

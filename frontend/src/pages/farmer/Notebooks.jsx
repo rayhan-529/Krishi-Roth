@@ -80,7 +80,6 @@ export default function Notebooks() {
     <div className="page">
       <PageHeader
         title={tr('ডিজিটাল খরচের খাতা', 'Digital expense notebook')}
-        subtitle={tr('বীজ, সার, শ্রমিক—সব খরচ লিখে রাখুন, মোট উৎপাদন খরচ নিজে থেকেই হিসাব হবে।', 'Write down every cost; the total production cost is calculated for you.')}
         actions={<button type="button" className="btn btn-primary" onClick={() => setCreating(true)}><Icon name="plus" size={18} /> {tr('নতুন খাতা', 'New notebook')}</button>}
       />
 
@@ -105,7 +104,7 @@ export default function Notebooks() {
               {list.data.map((n) => (
                 <li key={n.id}>
                   <Link to={`/farmer/notebooks/${n.id}`} className="notebook-link">
-                    <span className="notebook-icon" aria-hidden="true">📒</span>
+                    <span className="notebook-icon" aria-hidden="true"><Icon name="book" /></span>
                     <span>
                       <strong>{n.title}</strong>
                       <small>

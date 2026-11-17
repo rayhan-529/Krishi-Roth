@@ -6,6 +6,7 @@ import { get } from '../../services/api'
 import { label } from '../../utils/labels'
 import { date, money, monthLabel, num, pick, timeAgo } from '../../utils/format'
 import BarChart, { HBarList } from '../../components/BarChart'
+import { Glyph } from '../../components/Icon'
 import { Card, EmptyState, ErrorBox, Loader, PageHeader, PriceSourceNote, StatCard, StatusBadge } from '../../components/ui'
 
 export function RecentNotifications({ items }) {
@@ -34,7 +35,7 @@ export function QuickLinks({ links }) {
     <div className="quick-links">
       {links.map(([to, icon, bn, en]) => (
         <Link key={to} to={to}>
-          <span aria-hidden="true">{icon}</span>
+          <span aria-hidden="true"><Glyph value={icon} size={17} /></span>
           {tr(bn, en)}
         </Link>
       ))}
@@ -53,7 +54,7 @@ export default function FarmerDashboard() {
 
   return (
     <div className="page">
-      <PageHeader title={tr(`স্বাগতম, ${user.name}`, `Welcome, ${user.name}`)} subtitle={tr('আপনার খামারের এক নজরে হিসাব', 'Your farm at a glance')} />
+      <PageHeader banner title={tr(`স্বাগতম, ${user.name}`, `Welcome, ${user.name}`)} />
       <QuickLinks
         links={[
           ['/farmer/listings/new', '➕', 'ফসল বিক্রির বিজ্ঞাপন', 'Sell a crop'],

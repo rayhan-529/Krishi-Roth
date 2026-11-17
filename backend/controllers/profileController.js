@@ -12,7 +12,7 @@ const schemas = {
   update: {
     name: v.string().required().min(2).max(100),
     phone: v.phone(),
-    email: v.email(),
+    email: v.email().required(),
     district_id: v.id(),
     upazila: v.string().max(80),
     address: v.string().max(255),

@@ -24,7 +24,7 @@ export default function AdminTrades() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('লেনদেন পর্যবেক্ষণ', 'Transaction monitoring')} subtitle={tr('কোনো টাকা প্ল্যাটফর্মের মাধ্যমে যায় না; এখানে শুধু লেনদেনের রেকর্ড', 'No money passes through the platform; these are trade records')} />
+      <PageHeader title={tr('লেনদেন পর্যবেক্ষণ', 'Transaction monitoring')} />
       {meta && meta.summary && (
         <div className="chip-list">
           {meta.summary.map((s) => <span key={s.status} className="chip">{label('tradeStatus', s.status, lang)}: {num(s.total, lang)} · {money(s.value, lang)}</span>)}

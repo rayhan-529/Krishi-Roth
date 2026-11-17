@@ -97,7 +97,7 @@ export default function Chatbot() {
 
   return (
     <div className="page">
-      <PageHeader title={`🤖 ${tr('এআই কৃষি সহায়ক', 'AI farming assistant')}`} subtitle={tr('ফসল, সার, রোগ, ফসল কাটা ও খরচ নিয়ে বাংলায় বা ইংরেজিতে প্রশ্ন করুন', 'Ask about crops, fertilizer, diseases, harvesting and costs in Bengali or English')} />
+      <PageHeader title={tr('এআই কৃষি সহায়ক', 'AI farming assistant')} />
       {status.loading ? <Loader /> : !configured ? (
         <Alert tone="warning">
           <strong>{tr('এআই চ্যাটবট এখনো চালু করা হয়নি।', 'The AI chatbot is not configured yet.')}</strong>{' '}

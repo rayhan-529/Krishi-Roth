@@ -15,7 +15,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('অ্যাডমিন ড্যাশবোর্ড', 'Admin dashboard')} subtitle={tr('পুরো প্ল্যাটফর্মের এক নজরে অবস্থা', 'The whole platform at a glance')} />
+      <PageHeader banner title={tr('অ্যাডমিন ড্যাশবোর্ড', 'Admin dashboard')} />
       <div className="stats-grid">
         <StatCard icon="👥" label={tr('মোট ব্যবহারকারী', 'Total users')} value={num(c.total_users, lang)} hint={tr(`${num(c.blocked_users, lang)}টি বন্ধ`, `${num(c.blocked_users, lang)} blocked`)} to="/admin/users" />
         <StatCard icon="👨‍🌾" label={tr('কৃষক', 'Farmers')} value={num(c.farmers, lang)} to="/admin/users?role=farmer" />

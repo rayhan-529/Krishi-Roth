@@ -80,11 +80,15 @@ CREATE TABLE IF NOT EXISTS users (
   blocked_at           DATETIME          NULL,
   last_login_at        DATETIME          NULL,
   password_changed_at  DATETIME          NULL,
+  google_id            VARCHAR(64)       NULL,
+  apple_id             VARCHAR(64)       NULL,
   created_at           DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at           DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_users_email (email),
   UNIQUE KEY uq_users_phone (phone),
+  UNIQUE KEY uq_users_google (google_id),
+  UNIQUE KEY uq_users_apple (apple_id),
   KEY idx_users_role (role),
   KEY idx_users_district (district_id),
   KEY idx_users_verification (verification_status),
@@ -115,6 +119,26 @@ CREATE TABLE IF NOT EXISTS user_sessions (
   KEY idx_sessions_user (user_id, revoked_at),
   KEY idx_sessions_expires (expires_at),
   CONSTRAINT fk_sessions_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- 3c. One-time email codes
+--     Password-reset codes (6 digits) and sign-in links. Only a SHA-256
+--     hash is stored; each code expires, allows few attempts and is used once.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS auth_codes (
+  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id     INT UNSIGNED NOT NULL,
+  purpose     ENUM('password_reset','login_link') NOT NULL,
+  code_hash   CHAR(64)     NOT NULL,
+  attempts    TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  expires_at  DATETIME     NOT NULL,
+  used_at     DATETIME     NULL,
+  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_auth_codes_user (user_id, purpose, used_at),
+  KEY idx_auth_codes_hash (code_hash),
+  CONSTRAINT fk_auth_codes_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
@@ -577,7 +601,7 @@ CREATE TABLE IF NOT EXISTS trade_records (
   price_per_unit          DECIMAL(12,2) NOT NULL,
   total_amount            DECIMAL(14,2) NOT NULL,
   status                  ENUM('payment_pending','payment_confirmed','delivery_pending','completed','cancelled','disputed') NOT NULL DEFAULT 'payment_pending',
-  payment_method          ENUM('cash','bkash','nagad','rocket','bank_transfer','other') NULL,
+  payment_method          ENUM('cash','bkash','nagad','rocket','bank_transfer','other','wallet') NULL,
   payment_reference       VARCHAR(100)  NULL,
   payment_marked_at       DATETIME      NULL,
   payment_confirmed_at    DATETIME      NULL,
@@ -590,6 +614,12 @@ CREATE TABLE IF NOT EXISTS trade_records (
   cancelled_at            DATETIME      NULL,
   cancelled_by            INT UNSIGNED  NULL,
   cancel_reason           VARCHAR(500)  NULL,
+  -- Safe Trade escrow: the buyer's money is held by Krishi Roth until delivery.
+  escrow_status           ENUM('none','held','released','refunded') NOT NULL DEFAULT 'none',
+  escrow_amount           DECIMAL(14,2) NULL,
+  escrow_held_at          DATETIME      NULL,
+  escrow_settled_at       DATETIME      NULL,
+  auto_release_at         DATETIME      NULL,
   created_at              DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at              DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -620,6 +650,110 @@ CREATE TABLE IF NOT EXISTS trade_status_history (
   KEY idx_trade_history (trade_id, created_at),
   CONSTRAINT fk_trade_history_trade FOREIGN KEY (trade_id)   REFERENCES trade_records (id) ON DELETE CASCADE,
   CONSTRAINT fk_trade_history_user  FOREIGN KEY (changed_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- 14b. Wallet and Safe Trade escrow
+--      available          money the user can spend or withdraw
+--      escrow             buyer money locked in open Safe Trades
+--      pending_withdrawal money waiting for an admin payout
+--      Every change is written to wallet_transactions (the ledger).
+--      Deposits are bKash/Nagad/Rocket transfers to the platform number,
+--      checked and approved by an admin.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS wallets (
+  user_id             INT UNSIGNED  NOT NULL,
+  available           DECIMAL(14,2) NOT NULL DEFAULT 0,
+  escrow              DECIMAL(14,2) NOT NULL DEFAULT 0,
+  pending_withdrawal  DECIMAL(14,2) NOT NULL DEFAULT 0,
+  created_at          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id),
+  CONSTRAINT fk_wallets_user FOREIGN KEY (user_id) REFERENCES users (id),
+  CONSTRAINT chk_wallets_positive CHECK (available >= 0 AND escrow >= 0 AND pending_withdrawal >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS wallet_deposits (
+  id             INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  user_id        INT UNSIGNED  NOT NULL,
+  method         ENUM('bkash','nagad','rocket') NOT NULL,
+  amount         DECIMAL(14,2) NOT NULL,
+  sender_number  VARCHAR(20)   NOT NULL,
+  trx_id         VARCHAR(40)   NOT NULL,
+  status         ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+  admin_note     VARCHAR(300)  NULL,
+  reviewed_by    INT UNSIGNED  NULL,
+  reviewed_at    DATETIME      NULL,
+  created_at     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_deposits_trx (method, trx_id),
+  KEY idx_deposits_user (user_id, created_at),
+  KEY idx_deposits_status (status, created_at),
+  CONSTRAINT fk_deposits_user     FOREIGN KEY (user_id)     REFERENCES users (id),
+  CONSTRAINT fk_deposits_reviewer FOREIGN KEY (reviewed_by) REFERENCES users (id) ON DELETE SET NULL,
+  CONSTRAINT chk_deposits_amount CHECK (amount > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS wallet_withdrawals (
+  id                INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  user_id           INT UNSIGNED  NOT NULL,
+  method            ENUM('bkash','nagad','rocket') NOT NULL,
+  account_number    VARCHAR(20)   NOT NULL,
+  amount            DECIMAL(14,2) NOT NULL,
+  status            ENUM('pending','paid','rejected') NOT NULL DEFAULT 'pending',
+  payout_reference  VARCHAR(40)   NULL,
+  admin_note        VARCHAR(300)  NULL,
+  reviewed_by       INT UNSIGNED  NULL,
+  reviewed_at       DATETIME      NULL,
+  created_at        DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_withdrawals_user (user_id, created_at),
+  KEY idx_withdrawals_status (status, created_at),
+  CONSTRAINT fk_withdrawals_user     FOREIGN KEY (user_id)     REFERENCES users (id),
+  CONSTRAINT fk_withdrawals_reviewer FOREIGN KEY (reviewed_by) REFERENCES users (id) ON DELETE SET NULL,
+  CONSTRAINT chk_withdrawals_amount CHECK (amount > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS wallet_transactions (
+  id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id            INT UNSIGNED  NOT NULL,
+  type               ENUM('deposit','withdrawal','withdrawal_refund','escrow_hold','escrow_release','escrow_receive','escrow_refund','adjustment') NOT NULL,
+  amount             DECIMAL(14,2) NOT NULL,
+  available_after    DECIMAL(14,2) NOT NULL,
+  escrow_after       DECIMAL(14,2) NOT NULL,
+  trade_id           INT UNSIGNED  NULL,
+  deposit_id         INT UNSIGNED  NULL,
+  withdrawal_id      INT UNSIGNED  NULL,
+  note               VARCHAR(300)  NULL,
+  created_by         INT UNSIGNED  NULL,
+  created_at         DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_wallet_tx_user (user_id, created_at),
+  KEY idx_wallet_tx_trade (trade_id),
+  CONSTRAINT fk_wallet_tx_user       FOREIGN KEY (user_id)       REFERENCES users (id),
+  CONSTRAINT fk_wallet_tx_trade      FOREIGN KEY (trade_id)      REFERENCES trade_records (id),
+  CONSTRAINT fk_wallet_tx_deposit    FOREIGN KEY (deposit_id)    REFERENCES wallet_deposits (id),
+  CONSTRAINT fk_wallet_tx_withdrawal FOREIGN KEY (withdrawal_id) REFERENCES wallet_withdrawals (id),
+  CONSTRAINT fk_wallet_tx_creator    FOREIGN KEY (created_by)    REFERENCES users (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Payment SMS received on the platform's bKash/Nagad/Rocket phone, forwarded by
+-- an SMS-forwarder app. A pending deposit with the same method, TrxID and amount
+-- is approved automatically; each SMS (TrxID) can be used only once.
+CREATE TABLE IF NOT EXISTS wallet_sms (
+  id                  INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  method              ENUM('bkash','nagad','rocket') NOT NULL,
+  amount              DECIMAL(14,2) NOT NULL,
+  sender_number       VARCHAR(20)   NULL,
+  trx_id              VARCHAR(40)   NOT NULL,
+  sms_from            VARCHAR(40)   NULL,
+  raw_text            VARCHAR(1000) NOT NULL,
+  matched_deposit_id  INT UNSIGNED  NULL,
+  created_at          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_wallet_sms_trx (method, trx_id),
+  UNIQUE KEY uq_wallet_sms_deposit (matched_deposit_id),
+  CONSTRAINT fk_wallet_sms_deposit FOREIGN KEY (matched_deposit_id) REFERENCES wallet_deposits (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------

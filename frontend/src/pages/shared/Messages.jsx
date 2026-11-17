@@ -53,7 +53,7 @@ function Thread({ id, onSent }) {
     <div className="thread">
       <div className="thread-head">
         <strong>{otherName}</strong>
-        {c.listing_id && <Link to={`/listings/${c.listing_id}`} className="small">🌾 {pick(c, 'crop', lang)}</Link>}
+        {c.listing_id && <Link to={`/listings/${c.listing_id}`} className="small">{pick(c, 'crop', lang)}</Link>}
       </div>
       <div className="thread-body">
         {data.messages.map((m) => (
@@ -80,7 +80,7 @@ export default function Messages() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('বার্তা', 'Messages')} subtitle={tr('ক্রেতা ও কৃষকের মধ্যে সরাসরি কথা', 'Direct conversations between buyers and farmers')} />
+      <PageHeader title={tr('বার্তা', 'Messages')} />
       <div className={`messenger ${id ? 'has-thread' : ''}`}>
         <aside className="conversations">
           {list.loading && !list.data ? <Loader inline /> : list.error ? <ErrorBox error={list.error} /> : list.data.length === 0 ? (

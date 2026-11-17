@@ -7,8 +7,9 @@
  *   payment_pending -> cancelled           (before payment is confirmed)
  *   any open status -> disputed -> completed | cancelled (admin decides)
  *
- * No real money moves through Krishi Roth. "Payment" steps only record
- * what the buyer and the farmer report (e.g. a bKash transaction ID).
+ * Payment uses Safe Trade: the buyer pays from the Krishi Roth wallet into
+ * escrow (services/walletService.js), and the escrow is released to the farmer
+ * or refunded to the buyer when the trade ends.
  */
 const { notify } = require("./notificationService");
 

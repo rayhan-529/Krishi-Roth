@@ -19,7 +19,7 @@ export default function TransportServices() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('ফসল পরিবহন সেবা', 'Crop transport services')} subtitle={tr('ট্রাক, পিকআপ, নসিমন বা নৌকা বুক করুন', 'Book a truck, pickup, nosimon or boat')} />
+      <PageHeader title={tr('ফসল পরিবহন সেবা', 'Crop transport services')} />
       <div className="filters">
         <Select label={tr('যানবাহনের ধরন', 'Vehicle type')} value={filters.vehicle_type} onChange={(e) => update({ vehicle_type: e.target.value })} options={options('vehicleType', lang)} placeholder={tr('সব ধরন', 'All types')} />
         <AreaFilter divisionId={filters.division_id} districtId={filters.district_id} onChange={update} />

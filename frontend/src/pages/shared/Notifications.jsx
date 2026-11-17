@@ -5,7 +5,7 @@ import { useToast } from '../../context/ToastContext'
 import { useFetch } from '../../hooks/useFetch'
 import { del, get, patch } from '../../services/api'
 import { dateTime, num, timeAgo } from '../../utils/format'
-import Icon from '../../components/Icon'
+import Icon, { Glyph } from '../../components/Icon'
 import { EmptyState, ErrorBox, Loader, PageHeader, Pagination, Tabs } from '../../components/ui'
 
 const ICONS = {
@@ -40,7 +40,7 @@ export default function Notifications() {
         <ul className="notif-list">
           {data.map((n) => (
             <li key={n.id} className={n.is_read ? '' : 'unread'}>
-              <span className="notif-icon" aria-hidden="true">{ICONS[n.type] || '🔔'}</span>
+              <span className="notif-icon" aria-hidden="true"><Glyph value={ICONS[n.type] || '🔔'} /></span>
               <div>
                 {n.link ? <Link to={n.link} onClick={() => read(n)}><strong>{n.title}</strong></Link> : <strong onClick={() => read(n)}>{n.title}</strong>}
                 {n.body && <p>{n.body}</p>}
