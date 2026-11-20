@@ -13,6 +13,7 @@ import { num } from '../utils/format'
 import { GUEST_TOP, HOME_BY_ROLE, NAV_ICON, menuFor } from '../utils/nav'
 import Icon from './Icon'
 import { Avatar, Loader } from './ui'
+import Footer from './Footer'
 
 export function BrandMark({ size = 34 }) {
   return (
@@ -191,18 +192,7 @@ export default function Layout() {
         </Suspense>
       </main>
 
-      <footer className="footer">
-        <div className="footer-inner">
-          <small>© {new Date().getFullYear()} {tr('কৃষি রথ', 'Krishi Roth')}</small>
-          <nav>
-            <Link to="/about">{tr('আমাদের সম্পর্কে', 'About')}</Link>
-            <Link to="/market-prices">{tr('বাজারদর', 'Market prices')}</Link>
-            <Link to="/marketplace">{tr('ফসলের বাজার', 'Marketplace')}</Link>
-            <Link to="/privacy">{tr('গোপনীয়তা নীতি', 'Privacy')}</Link>
-            <Link to="/terms">{tr('শর্তাবলি', 'Terms')}</Link>
-          </nav>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }
