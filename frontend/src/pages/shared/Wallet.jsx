@@ -12,6 +12,7 @@ import { get, post } from '../../services/api'
 import { label } from '../../utils/labels'
 import { dateTime, money, num } from '../../utils/format'
 import Icon from '../../components/Icon'
+import CardSoon from '../../components/CardSoon'
 import { SecurityCodeField, useTwoFactorStatus } from '../../components/SecurityCode'
 import { Alert, EmptyState, ErrorBox, Input, Loader, Modal, PageHeader, Pagination, Select, StatusBadge, SubmitButton, Tabs } from '../../components/ui'
 
@@ -72,6 +73,7 @@ function DepositForm({ info, onDone }) {
           </button>
         ))}
       </div>
+      <CardSoon />
       <ol className="deposit-steps">
         <li>
           {tr(`${label('walletMethod', values.method, lang)} অ্যাপ থেকে এই নম্বরে "Send Money" করুন:`, `In your ${label('walletMethod', values.method, lang)} app, "Send Money" to:`)}

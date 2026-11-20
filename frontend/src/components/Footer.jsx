@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { useLang } from '../context/LanguageContext'
 import Icon from './Icon'
 import { BrandMark } from './Layout'
+import { CARD_BRANDS } from './CardSoon'
 
 const CONTACT_EMAIL = 'krishiroth@gmail.com'
 
@@ -113,6 +114,12 @@ export default function Footer() {
             {PAYMENTS.map(([key, bn, en]) => (
               <span key={key} className={`pay-badge pay-${key}`}>{tr(bn, en)}</span>
             ))}
+          </div>
+          <div className="pay-badges pay-soon">
+            {CARD_BRANDS.map(([key, name]) => (
+              <span key={key} className={`pay-badge card-${key}`}>{name}</span>
+            ))}
+            <span className="soon-tag">{tr('শীঘ্রই আসছে', 'Coming soon')}</span>
           </div>
           <p className="footer-safe"><Icon name="shield" size={16} /> {tr('সব কেনাকাটা সেফ ট্রেডে সুরক্ষিত', 'Every purchase protected by Safe Trade')}</p>
         </div>

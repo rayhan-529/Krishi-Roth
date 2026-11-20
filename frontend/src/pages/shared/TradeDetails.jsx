@@ -11,6 +11,7 @@ import { date, dateTime, money, num, pick } from '../../utils/format'
 import ReviewModal from '../../components/ReviewModal'
 import { Alert, Avatar, Card, ConfirmButton, ErrorBox, Input, Loader, PageHeader, Select, Stars, StatusBadge, SubmitButton, VerifiedBadge } from '../../components/ui'
 import Icon from '../../components/Icon'
+import CardSoon from '../../components/CardSoon'
 
 const STEPS = ['payment_pending', 'payment_confirmed', 'delivery_pending', 'completed']
 
@@ -94,6 +95,7 @@ function PayFromWallet({ trade: t, busy, onPay }) {
           <Link to="/wallet" className="btn btn-primary btn-block"><Icon name="plus" size={18} /> {tr('ব্যালেন্স যোগ করুন', 'Add balance')}</Link>
         </>
       )}
+      <CardSoon />
     </div>
   )
 }

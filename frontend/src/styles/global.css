@@ -2347,3 +2347,38 @@ a.stat-card:hover { transform: translateY(-2px); border-top-color: var(--tone); 
 .to-top:hover { background: #fbbf24; }
 @media print { .site-footer { display: none; } }
 .footer-social span { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.25); color: rgba(255, 255, 255, 0.78); }
+
+/* ---------------------------------------------------------------- cards: coming soon */
+.card-soon {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding: 0.65rem 0.8rem;
+  border: 1.5px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2, #f8faf8);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+.pay-wallet .card-soon { margin: 0.75rem 0 0; }
+.card-soon-text { flex: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.card-soon-text strong { color: var(--text-2); font-size: 0.92rem; }
+.card-marks { display: inline-flex; flex-wrap: wrap; gap: 0.3rem; }
+.card-mark, .pay-badge.card-visa, .pay-badge.card-mastercard, .pay-badge.card-amex { font-weight: 800; font-style: italic; letter-spacing: 0.02em; }
+.card-mark { padding: 0.12rem 0.45rem; border-radius: 5px; background: #fff; border: 1px solid var(--border); font-size: 0.72rem; }
+.card-visa { color: #1a1f71; }
+.card-mastercard { color: #eb001b; }
+.card-amex { color: #fff; background: #2e77bc !important; border-color: #2e77bc !important; }
+.soon-tag {
+  flex: none;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.pay-soon { margin-top: 0.5rem; align-items: center; }
+.pay-soon .pay-badge { opacity: 0.75; }
