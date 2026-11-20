@@ -49,7 +49,12 @@ const config = {
     secure: ["1", "true", "yes"].includes(read("SMTP_SECURE", "false").toLowerCase()),
     user: read("SMTP_USER"),
     // Gmail shows App passwords as "abcd efgh ijkl mnop"; the spaces are not part of it.
-    pass: read("SMTP_HOST") === "smtp.gmail.com" ? (process.env.SMTP_PASS ?? "").replace(/\s+/g, "") : process.env.SMTP_PASS ?? "",
+    // Gmail App passwords ("abcd efgh ijkl mnop") and Brevo SMTP keys never contain
+    // spaces, so any space or line break picked up while copy-pasting is removed.
+    // Other providers' passwords are only trimmed at the ends.
+    pass: /gmail\.com|brevo\.com/i.test(read("SMTP_HOST"))
+      ? (process.env.SMTP_PASS ?? "").replace(/\s+/g, "")
+      : (process.env.SMTP_PASS ?? "").trim(),
     // Defaults to the SMTP account itself (Gmail always sends from that address).
     from: read("MAIL_FROM") || (read("SMTP_USER") ? `Krishi Roth <${read("SMTP_USER")}>` : "Krishi Roth <no-reply@krishiroth.local>")
   },
