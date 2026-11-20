@@ -7,6 +7,7 @@ import { label } from '../../utils/labels'
 import { date, money, monthLabel, num, pick, timeAgo } from '../../utils/format'
 import BarChart, { HBarList } from '../../components/BarChart'
 import { Glyph } from '../../components/Icon'
+import WeatherCard from '../../components/WeatherCard'
 import { Card, EmptyState, ErrorBox, Loader, PageHeader, PriceSourceNote, StatCard, StatusBadge } from '../../components/ui'
 
 export function RecentNotifications({ items }) {
@@ -62,6 +63,7 @@ export default function FarmerDashboard() {
           ['/farmer/harvests', '🌱', 'ফসলের রেকর্ড', 'Harvest records'],
           ['/services/labour', '👨‍🌾', 'শ্রমিক খুঁজুন', 'Find labour'],
           ['/services/harvester', '🚜', 'যন্ত্র ভাড়া', 'Rent machinery'],
+          ['/weather', 'partly', 'আবহাওয়া', 'Weather'],
           ['/chatbot', '🤖', 'এআই সহায়ক', 'AI assistant'],
         ]}
       />
@@ -110,6 +112,7 @@ export default function FarmerDashboard() {
           </Card>
         </div>
         <div>
+          <WeatherCard compact districtId={user.district_id || undefined} />
           <Card title={tr('আসন্ন ফসল কাটা', 'Upcoming harvests')} actions={<Link to="/farmer/harvests">{tr('সব', 'All')} →</Link>}>
             {d.upcoming_harvests.length === 0 ? (
               <p className="muted">{tr('কোনো আসন্ন ফসল নেই।', 'No upcoming harvests.')}</p>
