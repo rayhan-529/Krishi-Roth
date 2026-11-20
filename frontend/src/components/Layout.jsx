@@ -14,6 +14,7 @@ import { GUEST_TOP, HOME_BY_ROLE, NAV_ICON, menuFor } from '../utils/nav'
 import Icon from './Icon'
 import { Avatar, Loader } from './ui'
 import Footer from './Footer'
+import ChatWidget from './ChatWidget'
 
 export function BrandMark({ size = 34 }) {
   return (
@@ -193,6 +194,7 @@ export default function Layout() {
       </main>
 
       <Footer />
+      <ChatWidget />
     </div>
   )
 }

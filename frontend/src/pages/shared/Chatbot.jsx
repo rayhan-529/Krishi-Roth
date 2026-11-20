@@ -1,6 +1,9 @@
-/** AI agricultural assistant with saved conversations. */
+/**
+ * Roth Sahayak: AI assistant with saved conversations. Answers farming and
+ * site questions from the knowledge base (RAG) and live data, with sources.
+ */
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useLang } from '../../context/LanguageContext'
 import { useToast } from '../../context/ToastContext'
@@ -8,13 +11,17 @@ import { useFetch } from '../../hooks/useFetch'
 import { del, get, post } from '../../services/api'
 import { timeAgo } from '../../utils/format'
 import Icon from '../../components/Icon'
+import { ChatMessage, MicButton, useVoiceInput } from '../../components/ChatParts'
 import { Alert, Loader, PageHeader, Spinner } from '../../components/ui'
 
 const EXAMPLES = [
+  ['আজ আলুর দাম কত?', 'What is the potato price today?'],
+  ['কাল কি বৃষ্টি হবে?', 'Will it rain tomorrow?'],
+  ['আমার ব্যালেন্স কত?', 'What is my wallet balance?'],
+  ['সেফ ট্রেড কীভাবে কাজ করে?', 'How does Safe Trade work?'],
   ['ধানের পাতায় হলুদ দাগ কেন হচ্ছে?', 'Why are there yellow spots on rice leaves?'],
   ['ধানে কোন সার ব্যবহার করা উচিত?', 'Which fertilizer should I use for rice?'],
   ['ধান কখন কাটতে হবে?', 'When should I harvest rice?'],
-  ['উৎপাদন খরচ কীভাবে কমানো যায়?', 'How can I reduce production costs?'],
   ['1 বিঘা জমিতে কত কেজি ধানের বীজ লাগে?', 'How much rice seed do I need for 1 bigha?'],
 ]
 
@@ -31,11 +38,23 @@ export default function Chatbot() {
   const [loadingThread, setLoadingThread] = useState(false)
   const [error, setError] = useState(null)
   const end = useRef(null)
+  const voice = useVoiceInput(setText)
+  const [params, setParams] = useSearchParams()
 
   const configured = status.data && status.data.configured
 
   useEffect(() => {
     if (user && configured) get('/chatbot/conversations').then((b) => setConversations(b.data)).catch(() => {})
+  }, [user, configured])
+
+  // Opened from the floating widget: /chatbot?c=12 shows that conversation.
+  useEffect(() => {
+    const c = Number(params.get('c'))
+    if (user && configured && c) {
+      open(c)
+      setParams({}, { replace: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, configured])
 
   useEffect(() => {
@@ -65,6 +84,7 @@ export default function Chatbot() {
   async function send(question) {
     const message = (question ?? text).trim()
     if (message.length < 2 || sending) return
+    if (voice.listening) voice.stop()
     setText('')
     setError(null)
     setMessages((list) => [...list, { id: `tmp-${Date.now()}`, role: 'user', content: message, created_at: new Date().toISOString() }])
@@ -97,7 +117,7 @@ export default function Chatbot() {
 
   return (
     <div className="page">
-      <PageHeader title={tr('এআই কৃষি সহায়ক', 'AI farming assistant')} />
+      <PageHeader title={tr('রথ সহায়ক', 'Roth Sahayak')} subtitle={tr('কৃষি প্রশ্ন, আজকের বাজারদর, আবহাওয়া, আপনার ওয়ালেট ও লেনদেন: সব এক জায়গায় জিজ্ঞেস করুন', 'Farming questions, today’s prices, weather, your wallet and trades: ask it all here')} />
       {status.loading ? <Loader /> : !configured ? (
         <Alert tone="warning">
           <strong>{tr('এআই চ্যাটবট এখনো চালু করা হয়নি।', 'The AI chatbot is not configured yet.')}</strong>{' '}
@@ -133,18 +153,15 @@ export default function Chatbot() {
                   </div>
                 </div>
               ) : (
-                messages.map((m) => (
-                  <div key={m.id} className={`bubble ${m.role === 'user' ? 'mine' : 'bot'}`}>
-                    <p className="pre-line">{m.content}</p>
-                  </div>
-                ))
+                messages.map((m) => <ChatMessage key={m.id} message={m} />)
               )}
               {sending && <div className="bubble bot typing"><Spinner small /> {tr('উত্তর লেখা হচ্ছে...', 'Writing an answer...')}</div>}
               <div ref={end} />
             </div>
             {error && <Alert tone="error">{error}</Alert>}
             <form className="thread-form" onSubmit={(e) => (e.preventDefault(), send())}>
-              <textarea className="input" rows={2} value={text} maxLength={2000} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())} placeholder={tr('আপনার প্রশ্ন লিখুন...', 'Type your question...')} />
+              <MicButton voice={voice} />
+              <textarea className="input" rows={2} value={text} maxLength={2000} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())} placeholder={voice.listening ? tr('বলুন, শুনছি...', 'Listening...') : tr('আপনার প্রশ্ন লিখুন বা 🎤 চেপে বলুন...', 'Type your question or tap 🎤 to speak...')} />
               <button type="submit" className="btn btn-primary" disabled={sending || text.trim().length < 2} aria-label={tr('পাঠান', 'Send')}><Icon name="send" size={18} /></button>
             </form>
             <p className="source-note"><Icon name="info" size={14} /> {tr('এআই-এর উত্তর সাধারণ পরামর্শ। সার/কীটনাশকের মাত্রা উপজেলা কৃষি কর্মকর্তা বা কৃষি কল সেন্টার (16123)-এ মিলিয়ে নিন।', 'AI answers are general advice. Confirm fertilizer or pesticide doses with your Upazila Agriculture Officer or the agriculture call centre (16123).')}</p>

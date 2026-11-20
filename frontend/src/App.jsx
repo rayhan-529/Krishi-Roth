@@ -51,6 +51,7 @@ const Offers = lazy(() => import('./pages/shared/Offers'))
 const Trades = lazy(() => import('./pages/shared/Trades'))
 const Wallet = lazy(() => import('./pages/shared/Wallet'))
 const AdminWallet = lazy(() => import('./pages/admin/AdminWallet'))
+const AdminKnowledge = lazy(() => import('./pages/admin/AdminKnowledge'))
 const TradeDetails = lazy(() => import('./pages/shared/TradeDetails'))
 const Bookings = lazy(() => import('./pages/shared/Bookings'))
 const BookingDetails = lazy(() => import('./pages/shared/BookingDetails'))
@@ -157,6 +158,7 @@ export default function App() {
                 <Route path="market-prices" element={<AdminMarketPrices />} />
                 <Route path="trades" element={<AdminTrades />} />
                 <Route path="wallet" element={<AdminWallet />} />
+                <Route path="knowledge" element={<AdminKnowledge />} />
                 <Route path="bookings" element={<AdminBookings />} />
                 <Route path="complaints" element={<AdminComplaints />} />
                 <Route path="reviews" element={<AdminReviews />} />

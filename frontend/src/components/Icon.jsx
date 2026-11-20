@@ -51,6 +51,8 @@ const PATHS = {
   printer: (<><path d="M6 9V3h12v6" /><rect x="3" y="9" width="18" height="8" rx="2" /><path d="M7 14h10v7H7z" /></>),
   megaphone: (<><path d="M3 10v4h4l8 5V5L7 10z" /><path d="M18 9a4 4 0 0 1 0 6" /></>),
   bot: (<><rect x="4" y="8" width="16" height="12" rx="3" /><path d="M12 8V4M9 13h.01M15 13h.01M9 17h6" /></>),
+  mic: (<><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v3" /></>),
+  stop: <rect x="6" y="6" width="12" height="12" rx="2" />,
   sparkle: <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.7 1.8 1.8.7-1.8.7L19 21l-.7-1.8-1.8-.7 1.8-.7z" />,
   compass: (<><circle cx="12" cy="12" r="9" /><path d="M15.5 8.5l-2 5-5 2 2-5z" /></>),
   wallet: (<><path d="M4 6h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4z" /><path d="M4 6l11-3v3M15 13h5" /></>),
