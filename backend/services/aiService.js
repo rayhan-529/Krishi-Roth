@@ -154,9 +154,137 @@ async function generateReply(history, language) {
   return { text, provider: s.provider, model: s.model };
 }
 
+// ------------------------------------------------------------ crop doctor (image)
+const DIAGNOSIS_FIELDS = `{
+  "is_plant": true or false (false if the photo is not a crop, leaf, fruit or plant),
+  "crop": "crop name, or empty",
+  "healthy": true or false,
+  "problem": "short name of the disease, pest or deficiency, or empty when healthy",
+  "confidence": "low" | "medium" | "high",
+  "summary": "1-2 simple sentences",
+  "symptoms": ["what is visible in the photo"],
+  "causes": ["likely causes"],
+  "treatment": ["practical steps, organic first, then chemical by generic name"],
+  "prevention": ["how to avoid it next time"],
+  "see_expert": true or false (true when serious, spreading fast or unsure)
+}`;
+
+function diagnosisPrompt(language, hints) {
+  return [
+    "You are 'Krishi Roth Crop Doctor', a plant-health assistant for farmers in Bangladesh.",
+    "Look at the photo and identify the crop and any disease, pest damage or nutrient deficiency.",
+    language === "en"
+      ? "Write every text value in simple English."
+      : "Write every text value in simple, everyday Bengali (বাংলা) that a rural farmer understands.",
+    "Always write numbers with English digits 0-9.",
+    "Pesticide and fertilizer advice must be general: say to follow the product label and confirm with the Upazila Agriculture Officer or call 16123.",
+    "If the photo is unclear, use confidence \"low\" and say what to photograph instead. Never claim certainty you do not have.",
+    hints.crop ? `The farmer says the crop is: ${hints.crop}.` : "",
+    hints.note ? `The farmer's note: ${hints.note}` : "",
+    `Reply with ONLY a JSON object, no markdown, in exactly this shape:\n${DIAGNOSIS_FIELDS}`
+  ].filter(Boolean).join("\n");
+}
+
+function parseDiagnosis(text) {
+  const match = String(text).match(/\{[\s\S]*\}/);
+  if (!match) throw new AiError("failed", "No JSON in the answer");
+  let data;
+  try {
+    data = JSON.parse(match[0]);
+  } catch {
+    throw new AiError("failed", "Invalid JSON in the answer");
+  }
+  const list = (v) => (Array.isArray(v) ? v.map(String).filter(Boolean).slice(0, 8) : []);
+  return {
+    is_plant: data.is_plant !== false,
+    crop: String(data.crop || "").slice(0, 80),
+    healthy: Boolean(data.healthy),
+    problem: String(data.problem || "").slice(0, 120),
+    confidence: ["low", "medium", "high"].includes(data.confidence) ? data.confidence : "low",
+    summary: String(data.summary || "").slice(0, 600),
+    symptoms: list(data.symptoms),
+    causes: list(data.causes),
+    treatment: list(data.treatment),
+    prevention: list(data.prevention),
+    see_expert: Boolean(data.see_expert)
+  };
+}
+
+async function visionGemini(s, prompt, image) {
+  const generationConfig = { temperature: 0.2, maxOutputTokens: 2000, responseMimeType: "application/json" };
+  if (/^gemini-2\.5-flash/.test(s.model)) generationConfig.thinkingConfig = { thinkingBudget: 0 };
+  const json = await post(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(s.model)}:generateContent`,
+    { "x-goog-api-key": s.apiKey },
+    {
+      contents: [{ role: "user", parts: [{ inline_data: { mime_type: image.mimeType, data: image.base64 } }, { text: prompt }] }],
+      generationConfig
+    }
+  );
+  const candidate = json.candidates && json.candidates[0];
+  if (!candidate) throw new AiError("blocked", "No answer returned");
+  return ((candidate.content && candidate.content.parts) || []).filter((p) => p.text && !p.thought).map((p) => p.text).join("");
+}
+
+async function visionOpenAI(s, prompt, image) {
+  const json = await post(
+    "https://api.openai.com/v1/chat/completions",
+    { Authorization: `Bearer ${s.apiKey}` },
+    {
+      model: s.model,
+      temperature: 0.2,
+      max_completion_tokens: 2000,
+      response_format: { type: "json_object" },
+      messages: [{
+        role: "user",
+        content: [
+          { type: "text", text: prompt },
+          { type: "image_url", image_url: { url: `data:${image.mimeType};base64,${image.base64}` } }
+        ]
+      }]
+    }
+  );
+  return (json.choices && json.choices[0] && json.choices[0].message && json.choices[0].message.content) || "";
+}
+
+async function visionAnthropic(s, prompt, image) {
+  const json = await post(
+    "https://api.anthropic.com/v1/messages",
+    { "x-api-key": s.apiKey, "anthropic-version": "2023-06-01" },
+    {
+      model: s.model,
+      max_tokens: 2000,
+      temperature: 0.2,
+      messages: [{
+        role: "user",
+        content: [
+          { type: "image", source: { type: "base64", media_type: image.mimeType, data: image.base64 } },
+          { type: "text", text: prompt }
+        ]
+      }]
+    }
+  );
+  return (json.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
+}
+
+/**
+ * Diagnoses a crop photo.
+ * @param {{ buffer: Buffer, mimeType: string }} photo  jpeg/png/webp
+ * @param {{ crop?: string, note?: string }} hints
+ * @param {"bn"|"en"} language
+ */
+async function diagnoseCropImage(photo, hints, language) {
+  const s = settings();
+  if (!s.configured) throw new AiError("not_configured");
+  const image = { mimeType: photo.mimeType, base64: photo.buffer.toString("base64") };
+  const call = { gemini: visionGemini, openai: visionOpenAI, anthropic: visionAnthropic }[s.provider];
+  const text = await call(s, diagnosisPrompt(language, hints), image);
+  return { ...parseDiagnosis(text), provider: s.provider, model: s.model };
+}
+
 function status() {
   const s = settings();
   return { configured: s.configured, provider: s.provider, provider_label: s.label, model: s.configured ? s.model : null };
 }
 
-module.exports = { generateReply, status, AiError };
+module.exports = { generateReply, diagnoseCropImage, status, AiError };
