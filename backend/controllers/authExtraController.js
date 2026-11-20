@@ -28,7 +28,7 @@ const schemas = {
   email: { email: v.email().required() },
   resetPassword: {
     email: v.email().required(),
-    code: v.string().required().pattern(/^\d{6}$/, { bn: "৬ সংখ্যার কোড দিন।", en: "Enter the 6-digit code." }),
+    code: v.string().required().pattern(/^\d{6}$/, { bn: "6 সংখ্যার কোড দিন।", en: "Enter the 6-digit code." }),
     new_password: v.string().required()
   },
   loginLink: { token: v.string().required().max(200) },

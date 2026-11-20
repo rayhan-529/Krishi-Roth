@@ -59,7 +59,7 @@ export default function AdminDashboard() {
       </div>
       <div className="two-col">
         <div>
-          <Card title={tr('নতুন নিবন্ধন (শেষ ৬ মাস)', 'New registrations (last 6 months)')}>
+          <Card title={tr('নতুন নিবন্ধন (শেষ 6 মাস)', 'New registrations (last 6 months)')}>
             <BarChart data={d.monthly_registrations.map((m) => ({ label: monthLabel(m.month, lang), value: m.value }))} format={(v) => num(v, lang)} emptyText={tr('কোনো তথ্য নেই।', 'No data.')} />
           </Card>
           <Card title={tr('সাম্প্রতিক কার্যক্রম', 'Recent activity')} actions={<Link to="/admin/reports">{tr('সব', 'All')} →</Link>}>

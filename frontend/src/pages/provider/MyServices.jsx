@@ -130,7 +130,7 @@ function ServiceForm({ kind, item, onClose, onSaved }) {
           <>
             <div className="grid-2">
               <Select label={tr('যানবাহনের ধরন', 'Vehicle type')} options={options('vehicleType', lang)} required {...bind('vehicle_type')} />
-              <Input label={tr('নাম/বিবরণ', 'Name')} placeholder={tr('যেমন: ৫ টনের ট্রাক', 'e.g. 5-ton truck')} required maxLength={120} {...bind('name')} />
+              <Input label={tr('নাম/বিবরণ', 'Name')} placeholder={tr('যেমন: 5 টনের ট্রাক', 'e.g. 5-ton truck')} required maxLength={120} {...bind('name')} />
             </div>
             <div className="grid-3">
               <Input type="number" min="0" step="0.01" label={tr('ধারণক্ষমতা', 'Capacity')} required {...bind('capacity')} />

@@ -1,9 +1,11 @@
 /**
  * Numbers, money and dates in the chosen language.
- * Bengali uses Bengali digits (১২৩) and Bangladeshi grouping (১,২৩,৪৫৬).
+ * Bengali text, but always English digits 0-9 and Bangladeshi grouping (1,23,456).
  * All dates/times from the API are Bangladesh time (UTC+06:00).
  */
-const LOCALE = { bn: 'bn-BD', en: 'en-IN' }
+// Bengali text with English digits ("20 নভেম্বর 2026", "৳ 9,56,975"): Bengali digits are hard to
+// read in small sizes, so numbers always use 0-9. Bangladeshi grouping is kept.
+const LOCALE = { bn: 'bn-BD-u-nu-latn', en: 'en-IN' }
 
 export function num(value, lang, maxFraction = 2) {
   if (value === null || value === undefined || value === '' || Number.isNaN(Number(value))) return '—'

@@ -67,7 +67,7 @@ export function Privacy() {
         <Section title={tr('আপনার অধিকার', 'Your choices')}>
           <p>
             {tr(
-              'প্রোফাইল পেজ থেকে আপনি নিজের তথ্য দেখতে ও বদলাতে পারেন। অ্যাকাউন্ট ও তথ্য মুছে ফেলতে চাইলে নিচের ইমেইলে লিখুন, আমরা ৩০ দিনের মধ্যে মুছে দেব।',
+              'প্রোফাইল পেজ থেকে আপনি নিজের তথ্য দেখতে ও বদলাতে পারেন। অ্যাকাউন্ট ও তথ্য মুছে ফেলতে চাইলে নিচের ইমেইলে লিখুন, আমরা 30 দিনের মধ্যে মুছে দেব।',
               'You can view and edit your details on your profile page. To delete your account and data, email us below and we will delete it within 30 days.',
             )}
           </p>

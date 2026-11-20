@@ -36,7 +36,7 @@ function Overview() {
         <Card title={tr('সেবা অনুযায়ী বুকিং', 'Bookings by service')}>
           <HBarList items={Object.entries(bookingTotals).map(([k, v]) => ({ label: label('bookingType', k, lang), value: v }))} format={(v) => num(v, lang)} emptyText={tr('কোনো তথ্য নেই', 'No data')} />
         </Card>
-        <Card title={tr('জেলা অনুযায়ী ব্যবহারকারী (শীর্ষ ১০)', 'Users by district (top 10)')}>
+        <Card title={tr('জেলা অনুযায়ী ব্যবহারকারী (শীর্ষ 10)', 'Users by district (top 10)')}>
           <HBarList items={d.users_by_district.map((u) => ({ label: pick(u, 'district', lang), value: u.total }))} format={(v) => num(v, lang)} emptyText={tr('কোনো তথ্য নেই', 'No data')} />
         </Card>
       </div>
@@ -53,7 +53,7 @@ function Farming() {
   return (
     <>
       <div className="stats-grid">
-        <StatCard icon="🌱" label={tr('আগামী ১৪ দিনে ফসল কাটা', 'Harvests due in 14 days')} value={num(h.data.upcoming_14_days, lang)} />
+        <StatCard icon="🌱" label={tr('আগামী 14 দিনে ফসল কাটা', 'Harvests due in 14 days')} value={num(h.data.upcoming_14_days, lang)} />
         <StatCard icon="📒" label={tr('খরচের খাতা', 'Expense notebooks')} value={num(e.data.totals.notebooks, lang)} hint={tr(`${num(e.data.totals.farmers, lang)} জন কৃষক`, `${num(e.data.totals.farmers, lang)} farmers`)} />
         <StatCard icon="🧮" tone="red" label={tr('মোট লিপিবদ্ধ খরচ', 'Total recorded cost')} value={money(e.data.totals.total_cost, lang)} />
       </div>

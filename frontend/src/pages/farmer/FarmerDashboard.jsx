@@ -76,7 +76,7 @@ export default function FarmerDashboard() {
 
       <div className="two-col">
         <div>
-          <Card title={tr('মাসিক খরচ (শেষ ৬ মাস)', 'Monthly expenses (last 6 months)')}>
+          <Card title={tr('মাসিক খরচ (শেষ 6 মাস)', 'Monthly expenses (last 6 months)')}>
             <BarChart data={d.monthly_expenses.map((m) => ({ label: monthLabel(m.month, lang), value: m.value }))} format={(v) => money(v, lang)} emptyText={tr('এখনো কোনো খরচ লেখা হয়নি।', 'No expenses recorded yet.')} />
           </Card>
           <Card title={tr('অপেক্ষমাণ ক্রয় প্রস্তাব', 'Pending purchase offers')} actions={<Link to="/offers">{tr('সব', 'All')} →</Link>}>

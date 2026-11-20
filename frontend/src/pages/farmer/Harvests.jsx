@@ -54,7 +54,7 @@ function HarvestForm({ harvest, onClose, onSaved }) {
         </div>
         <div className="grid-3">
           <Input type="date" label={tr('রোপণের তারিখ', 'Planting date')} {...bind('planting_date')} />
-          <Input type="date" label={tr('সম্ভাব্য কাটার তারিখ', 'Expected harvest date')} {...bind('expected_harvest_date')} hint={tr('৩ দিন আগে মনে করিয়ে দেওয়া হবে', 'You will be reminded 3 days before')} />
+          <Input type="date" label={tr('সম্ভাব্য কাটার তারিখ', 'Expected harvest date')} {...bind('expected_harvest_date')} hint={tr('3 দিন আগে মনে করিয়ে দেওয়া হবে', 'You will be reminded 3 days before')} />
           <Input type="date" label={tr('আসল কাটার তারিখ', 'Actual harvest date')} required={values.status === 'completed'} {...bind('actual_harvest_date')} />
         </div>
         <div className="grid-3">

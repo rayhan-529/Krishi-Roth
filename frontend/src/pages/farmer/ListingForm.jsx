@@ -90,7 +90,7 @@ export default function ListingForm() {
         <Card title={tr('ফসলের তথ্য', 'Crop details')}>
           <div className="grid-2">
             <CropSelect value={values.crop_id} onChange={chooseCrop} error={errors.crop_id} required />
-            <Input label={tr('জাত (ঐচ্ছিক)', 'Variety (optional)')} placeholder={tr('যেমন: ব্রি ধান ২৮', 'e.g. BRRI dhan28')} maxLength={100} {...bind('variety')} />
+            <Input label={tr('জাত (ঐচ্ছিক)', 'Variety (optional)')} placeholder={tr('যেমন: ব্রি ধান 28', 'e.g. BRRI dhan28')} maxLength={100} {...bind('variety')} />
           </div>
           <div className="grid-3">
             <Input type="number" min="0" step="0.01" label={tr('মোট পরিমাণ', 'Total quantity')} required {...bind('quantity')} />
@@ -107,7 +107,7 @@ export default function ListingForm() {
         <Card title={tr('কোথায় আছে', 'Location')}>
           <LocationFields districtId={values.district_id} upazila={values.upazila} onDistrict={(v) => set('district_id', v)} onUpazila={(v) => set('upazila', v)} errors={errors} required />
         </Card>
-        <Card title={tr('ছবি (সর্বোচ্চ ৫টি)', 'Photos (up to 5)')}>
+        <Card title={tr('ছবি (সর্বোচ্চ 5টি)', 'Photos (up to 5)')}>
           <ImagePicker
             files={files}
             onFiles={setFiles}

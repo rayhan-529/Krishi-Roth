@@ -55,7 +55,7 @@ function Register({ social }) {
     event.preventDefault()
     setError(null)
     if (!social && !isStrongPassword(values.password)) {
-      setErrors({ password: tr('পাসওয়ার্ডে কমপক্ষে ৬ অক্ষর, একটি অক্ষর, একটি সংখ্যা ও একটি চিহ্ন (@ # $ !) দিন।', 'Use at least 6 characters with a letter, a number and a symbol (@ # $ !).') })
+      setErrors({ password: tr('পাসওয়ার্ডে কমপক্ষে 6 অক্ষর, একটি অক্ষর, একটি সংখ্যা ও একটি চিহ্ন (@ # $ !) দিন।', 'Use at least 6 characters with a letter, a number and a symbol (@ # $ !).') })
       return
     }
     if (!social && values.password !== values.confirm) {

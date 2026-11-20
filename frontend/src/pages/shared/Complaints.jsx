@@ -38,7 +38,7 @@ export default function Complaints() {
           <form onSubmit={submit} className="form" noValidate>
             <Select label={tr('বিষয়ের ধরন', 'Type')} options={options('complaintCategory', lang)} {...bind('category')} />
             <Input label={tr('শিরোনাম', 'Subject')} required maxLength={200} {...bind('subject')} />
-            <TextArea label={tr('বিস্তারিত লিখুন', 'Describe the problem')} required rows={5} maxLength={5000} hint={tr('কমপক্ষে ১০ অক্ষর', 'At least 10 characters')} {...bind('description')} />
+            <TextArea label={tr('বিস্তারিত লিখুন', 'Describe the problem')} required rows={5} maxLength={5000} hint={tr('কমপক্ষে 10 অক্ষর', 'At least 10 characters')} {...bind('description')} />
             <div className="grid-2">
               <Input type="number" min="1" label={tr('লেনদেন নম্বর (থাকলে)', 'Trade no. (if any)')} {...bind('trade_id')} />
               <Input type="number" min="1" label={tr('বুকিং নম্বর (থাকলে)', 'Booking no. (if any)')} {...bind('booking_id')} />

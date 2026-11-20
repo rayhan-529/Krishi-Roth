@@ -225,7 +225,7 @@ export default function NotebookEditor() {
           </div>
           <div className="ledger-actions">
             <button type="button" className="btn btn-outline" onClick={() => (setRows((list) => [...list, ...Array.from({ length: 5 }, blankRow)]), setDirty(true))}>
-              <Icon name="plus" size={16} /> {tr('আরও ৫টি সারি', 'Add 5 rows')}
+              <Icon name="plus" size={16} /> {tr('আরও 5টি সারি', 'Add 5 rows')}
             </button>
             {dirty && <span className="muted">{tr('অসংরক্ষিত পরিবর্তন আছে', 'Unsaved changes')}</span>}
             <button type="button" className="btn btn-primary" onClick={save} disabled={saving || !dirty}>

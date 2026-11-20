@@ -23,7 +23,7 @@ const schemas = {
   create: {
     document_type: v.enum(DOCUMENT_TYPES).required(),
     document_number_last4: v.string().pattern(/^[0-9A-Za-z]{4}$/, {
-      bn: "নম্বরের শেষ ৪টি অক্ষর/সংখ্যা দিন।",
+      bn: "নম্বরের শেষ 4টি অক্ষর/সংখ্যা দিন।",
       en: "Enter the last 4 characters of the number."
     }),
     note: v.string().max(500)

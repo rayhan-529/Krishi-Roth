@@ -68,7 +68,7 @@ function PasswordForm() {
   async function submit(event) {
     event.preventDefault()
     if (!isStrongPassword(values.new_password)) {
-      setErrors({ new_password: tr('পাসওয়ার্ডে কমপক্ষে ৬ অক্ষর, একটি অক্ষর, একটি সংখ্যা ও একটি চিহ্ন (@ # $ !) দিন।', 'Use at least 6 characters with a letter, a number and a symbol (@ # $ !).') })
+      setErrors({ new_password: tr('পাসওয়ার্ডে কমপক্ষে 6 অক্ষর, একটি অক্ষর, একটি সংখ্যা ও একটি চিহ্ন (@ # $ !) দিন।', 'Use at least 6 characters with a letter, a number and a symbol (@ # $ !).') })
       return
     }
     if (values.new_password !== values.confirm) {
@@ -166,10 +166,10 @@ function Verification({ profile, onChanged }) {
           <p className="muted small">{tr('পরিচয়পত্রের ছবি বা PDF দিন। ডকুমেন্টটি গোপন থাকে, শুধু অ্যাডমিন দেখতে পারেন।', 'Upload a photo or PDF of your ID. It stays private and only administrators can see it.')}</p>
           <div className="grid-2">
             <Select label={tr('ডকুমেন্টের ধরন', 'Document type')} options={options('documentType', lang)} {...bind('document_type')} />
-            <Input label={tr('নম্বরের শেষ ৪ অক্ষর', 'Last 4 characters of the number')} maxLength={4} {...bind('document_number_last4')} />
+            <Input label={tr('নম্বরের শেষ 4 অক্ষর', 'Last 4 characters of the number')} maxLength={4} {...bind('document_number_last4')} />
           </div>
           <div className={`field ${errors.document ? 'has-error' : ''}`}>
-            <label htmlFor="doc-file">{tr('ডকুমেন্ট (JPG, PNG, WEBP বা PDF, ৩ MB পর্যন্ত)', 'Document (JPG, PNG, WEBP or PDF, up to 3 MB)')}</label>
+            <label htmlFor="doc-file">{tr('ডকুমেন্ট (JPG, PNG, WEBP বা PDF, 3 MB পর্যন্ত)', 'Document (JPG, PNG, WEBP or PDF, up to 3 MB)')}</label>
             <input id="doc-file" ref={fileInput} type="file" className="input" accept="image/jpeg,image/png,image/webp,application/pdf" onChange={(e) => (setFile(e.target.files[0] || null), setErrors({}))} />
             {errors.document && <small className="field-error">{errors.document}</small>}
           </div>

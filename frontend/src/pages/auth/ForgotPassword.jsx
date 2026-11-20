@@ -64,7 +64,7 @@ export default function ForgotPassword() {
     event.preventDefault()
     setError(null)
     if (!isStrongPassword(password)) {
-      setFieldErrors({ new_password: tr('পাসওয়ার্ডে কমপক্ষে ৬ অক্ষর, একটি অক্ষর, একটি সংখ্যা ও একটি চিহ্ন (@ # $ !) দিন।', 'Use at least 6 characters with a letter, a number and a symbol (@ # $ !).') })
+      setFieldErrors({ new_password: tr('পাসওয়ার্ডে কমপক্ষে 6 অক্ষর, একটি অক্ষর, একটি সংখ্যা ও একটি চিহ্ন (@ # $ !) দিন।', 'Use at least 6 characters with a letter, a number and a symbol (@ # $ !).') })
       return
     }
     if (password !== confirm) {
@@ -93,7 +93,7 @@ export default function ForgotPassword() {
         <h1 className="auth-title">{step === 'email' ? tr('পাসওয়ার্ড রিসেট', 'Reset password') : tr('কোড দিন', 'Enter the code')}</h1>
         <p className="muted">
           {step === 'email'
-            ? tr('আপনার ইমেইলে একটি ৬ সংখ্যার কোড পাঠানো হবে।', "We'll email you a 6-digit code.")
+            ? tr('আপনার ইমেইলে একটি 6 সংখ্যার কোড পাঠানো হবে।', "We'll email you a 6-digit code.")
             : tr(`${email} ঠিকানায় পাঠানো কোড ও নতুন পাসওয়ার্ড দিন।`, `Enter the code sent to ${email} and a new password.`)}
         </p>
         <ErrorBox error={error} />
@@ -107,7 +107,7 @@ export default function ForgotPassword() {
           <form onSubmit={reset} className="form" noValidate>
             {notice && <Alert tone="success">{notice}</Alert>}
             <Input
-              label={tr('৬ সংখ্যার কোড', '6-digit code')}
+              label={tr('6 সংখ্যার কোড', '6-digit code')}
               className="code-input"
               inputMode="numeric"
               autoComplete="one-time-code"

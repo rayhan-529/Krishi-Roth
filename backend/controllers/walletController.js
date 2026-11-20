@@ -41,7 +41,7 @@ const accountNumber = () =>
       const digits = String(value).replace(/[\s-]/g, "").replace(/^\+?88/, "");
       return /^01[3-9]\d{8,9}$/.test(digits)
         ? null
-        : { bn: "সঠিক বিকাশ/নগদ/রকেট নম্বর দিন (০১ দিয়ে শুরু, ১১ বা ১২ সংখ্যা)।", en: "Enter a valid bKash/Nagad/Rocket number (starts with 01, 11 or 12 digits)." };
+        : { bn: "সঠিক বিকাশ/নগদ/রকেট নম্বর দিন (01 দিয়ে শুরু, 11 বা 12 সংখ্যা)।", en: "Enter a valid bKash/Nagad/Rocket number (starts with 01, 11 or 12 digits)." };
     });
 const schemas = {
   paging,

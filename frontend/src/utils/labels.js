@@ -82,7 +82,7 @@ const L = {
     transport_service: ['পরিবহন সেবা', 'Transport service'],
   },
   season: {
-    rabi: ['রবি', 'Rabi'], kharif_1: ['খরিফ-১', 'Kharif-1'], kharif_2: ['খরিফ-২', 'Kharif-2'], boro: ['বোরো', 'Boro'],
+    rabi: ['রবি', 'Rabi'], kharif_1: ['খরিফ-1', 'Kharif-1'], kharif_2: ['খরিফ-2', 'Kharif-2'], boro: ['বোরো', 'Boro'],
     aus: ['আউশ', 'Aus'], aman: ['আমন', 'Aman'], year_round: ['সারা বছর', 'Year round'],
   },
   documentType: {

@@ -23,7 +23,7 @@ export default function AdminReviews() {
   return (
     <div className="page">
       <PageHeader title={tr('রিভিউ মডারেশন', 'Review moderation')} />
-      <Tabs active={tab} onChange={(t) => (setTab(t), setPage(1))} tabs={[{ key: 'visible', label: tr('দৃশ্যমান', 'Visible') }, { key: 'low', label: tr('কম রেটিং (১-২)', 'Low ratings (1-2)') }, { key: 'hidden', label: tr('লুকানো', 'Hidden') }]} />
+      <Tabs active={tab} onChange={(t) => (setTab(t), setPage(1))} tabs={[{ key: 'visible', label: tr('দৃশ্যমান', 'Visible') }, { key: 'low', label: tr('কম রেটিং (1-2)', 'Low ratings (1-2)') }, { key: 'hidden', label: tr('লুকানো', 'Hidden') }]} />
       <Card>
         {loading ? <Loader /> : error ? <ErrorBox error={error} onRetry={reload} /> : data.length === 0 ? <EmptyState icon="⭐" title={tr('কোনো রিভিউ নেই', 'No reviews')} /> : (
           <ul className="review-list">

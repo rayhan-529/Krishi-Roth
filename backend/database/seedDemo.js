@@ -47,7 +47,7 @@ const FARMERS = [
         desc: "রাসায়নিকমুক্ত হিমসাগর আম, গাছ থেকে সরাসরি পাড়া। ক্যারেটে প্যাক করে দেওয়া হবে।" },
       { crop: "litchi", variety: "বোম্বাই", qty: 300, unit: "kg", price: 260, min: 10, days: -2,
         desc: "টাটকা বোম্বাই লিচু, মিষ্টি ও রসালো।" },
-      { crop: "paddy", variety: "ব্রি ধান-২৮", qty: 120, unit: "maund", price: 1350, min: 10, days: -10,
+      { crop: "paddy", variety: "ব্রি ধান-28", qty: 120, unit: "maund", price: 1350, min: 10, days: -10,
         desc: "শুকনো ও পরিষ্কার ধান, গুদামে রাখা আছে।" }
     ]
   },
@@ -67,7 +67,7 @@ const FARMERS = [
     listings: [
       { crop: "cauliflower", variety: "স্নোবল", qty: 1500, unit: "piece", price: 35, min: 100, days: -2,
         desc: "বড় সাইজের সাদা ফুলকপি, পাইকারি বিক্রি।" },
-      { crop: "tomato", variety: "বারি টমেটো-১৪", qty: 900, unit: "kg", price: 45, min: 50, days: -1,
+      { crop: "tomato", variety: "বারি টমেটো-14", qty: 900, unit: "kg", price: 45, min: 50, days: -1,
         desc: "লাল ও শক্ত টমেটো, দূরে পাঠানোর উপযোগী।" },
       { crop: "brinjal", variety: "খটখটিয়া", qty: 600, unit: "kg", price: 40, min: 30, days: -2,
         desc: "বিষমুক্ত বেগুন, ফেরোমন ফাঁদ ব্যবহার করে চাষ।" }
@@ -77,7 +77,7 @@ const FARMERS = [
     key: "nasrin", name: "নাসরিন আক্তার", district: 42, upazila: "ত্রিশাল", verified: true,
     listings: [
       { crop: "jackfruit", variety: null, qty: 250, unit: "piece", price: 180, min: 10, days: -4,
-        desc: "পাকা ও মিষ্টি কাঁঠাল, প্রতিটি ৬-১০ কেজি।" },
+        desc: "পাকা ও মিষ্টি কাঁঠাল, প্রতিটি 6-10 কেজি।" },
       { crop: "pineapple", variety: "হানিকুইন", qty: 1200, unit: "piece", price: 40, min: 50, days: -3,
         desc: "মধুপুরের হানিকুইন আনারস।" },
       { crop: "ginger", variety: null, qty: 350, unit: "kg", price: 160, min: 20, days: -20,
@@ -109,11 +109,11 @@ const FARMERS = [
   {
     key: "shahana", name: "শাহানা পারভীন", district: 36, upazila: "কুমারখালী", verified: true,
     listings: [
-      { crop: "lentil", variety: "বারি মসুর-৮", qty: 600, unit: "kg", price: 115, min: 40, days: -40,
+      { crop: "lentil", variety: "বারি মসুর-8", qty: 600, unit: "kg", price: 115, min: 40, days: -40,
         desc: "চিকন দানার দেশি মসুর ডাল, পরিষ্কার করা।" },
       { crop: "garlic", variety: "দেশি", qty: 500, unit: "kg", price: 180, min: 20, days: -35,
         desc: "ঝাঁঝালো দেশি রসুন, শুকনো।" },
-      { crop: "mustard", variety: "বারি সরিষা-১৪", qty: 40, unit: "maund", price: 3600, min: 5, days: -50,
+      { crop: "mustard", variety: "বারি সরিষা-14", qty: 40, unit: "maund", price: 3600, min: 5, days: -50,
         desc: "তেলের জন্য উন্নত মানের সরিষা।" }
     ]
   },
@@ -140,7 +140,7 @@ const BUYERS = [
 const LABOURERS = [
   { key: "labour.babul", name: "বাবুল মিয়া", district: 51, upazila: "পবা", verified: true,
     skills: "ধান কাটা, চারা রোপণ, নিড়ানি", years: 12, wage: 700,
-    details: "১২ বছর ধরে ধান ও সবজি খেতে কাজ করছি। দলসহ কাজ করতে পারি।" },
+    details: "12 বছর ধরে ধান ও সবজি খেতে কাজ করছি। দলসহ কাজ করতে পারি।" },
   { key: "labour.rafiq", name: "রফিকুল ইসলাম", district: 59, upazila: "পীরগঞ্জ", verified: false,
     skills: "আলু তোলা, সেচ, কীটনাশক স্প্রে", years: 6, wage: 650,
     details: "আলু ও ভুট্টা খেতে অভিজ্ঞ। নিজের স্প্রে মেশিন আছে।" },
@@ -179,14 +179,14 @@ const MACHINE_OWNERS = [
 const TRANSPORT_OWNERS = [
   { key: "transport.jahid", name: "জাহিদ পরিবহন", district: 52, upazila: "উল্লাপাড়া", verified: true,
     vehicles: [
-      { type: "truck", name: "৫ টন ট্রাক", reg: "ঢাকা মেট্রো ট-১১-২২৩৩", cap: 5, capUnit: "ton", price: 45, unit: "per_km",
+      { type: "truck", name: "5 টন ট্রাক", reg: "ঢাকা মেট্রো ট-11-2233", cap: 5, capUnit: "ton", price: 45, unit: "per_km",
         desc: "সারা দেশে ফসল পরিবহন। ত্রিপল ঢাকা দেওয়া হয়।" },
-      { type: "covered_van", name: "কাভার্ড ভ্যান", reg: "সিরাজগঞ্জ ন-১১-৪৫৬৭", cap: 3, capUnit: "ton", price: 9000, unit: "per_trip",
+      { type: "covered_van", name: "কাভার্ড ভ্যান", reg: "সিরাজগঞ্জ ন-11-4567", cap: 3, capUnit: "ton", price: 9000, unit: "per_trip",
         desc: "সবজি ও ফলের জন্য ঢাকা গাড়ি।" }
     ] },
   { key: "transport.sohel", name: "সোহেল পিকআপ সার্ভিস", district: 33, upazila: "যশোর সদর", verified: false,
     vehicles: [
-      { type: "pickup", name: "পিকআপ ভ্যান", reg: "যশোর ন-১৩-৭৮৯০", cap: 1.5, capUnit: "ton", price: 3500, unit: "per_trip",
+      { type: "pickup", name: "পিকআপ ভ্যান", reg: "যশোর ন-13-7890", cap: 1.5, capUnit: "ton", price: 3500, unit: "per_trip",
         desc: "কাছাকাছি বাজারে দ্রুত পণ্য পৌঁছে দেওয়া।" }
     ] },
   { key: "transport.belal", name: "বেলাল নৌ পরিবহন", district: 3, upazila: "চরফ্যাশন", verified: true,
@@ -202,7 +202,7 @@ const COMPLAINTS = [
   { category: "delivery", status: "open", subject: "পণ্য সময়মতো পৌঁছায়নি",
     description: "অর্ডার করা আলু নির্ধারিত তারিখের দুই দিন পরে এসেছে। পরিবহন খরচ নিয়েও ঝামেলা হয়েছে।" },
   { category: "quality", status: "in_review", subject: "টমেটোর মান খারাপ ছিল",
-    description: "ছবিতে যেমন দেখানো হয়েছিল, পাওয়া টমেটো তেমন ছিল না। প্রায় ২০% নষ্ট।" },
+    description: "ছবিতে যেমন দেখানো হয়েছিল, পাওয়া টমেটো তেমন ছিল না। প্রায় 20% নষ্ট।" },
   { category: "payment", status: "resolved", subject: "বিকাশ পেমেন্ট নিশ্চিত হচ্ছিল না",
     description: "বিকাশে টাকা পাঠানোর পরেও কৃষক পেমেন্ট নিশ্চিত করেননি।",
     admin_note: "দুই পক্ষের সাথে কথা বলে লেনদেন নিশ্চিত করা হয়েছে।" },
@@ -525,7 +525,7 @@ async function seed(db) {
           farmer.district, farmer.upazila, `${farmer.upazila}, উত্তর মাঠ`,
           p.type === "transport" ? pick(["কারওয়ান বাজার, ঢাকা", "চট্টগ্রাম রেয়াজউদ্দিন বাজার", "যশোর বড় বাজার"]) : null,
           size, p.sizeUnit, p.price, p.unit, total,
-          pick(["সকাল ৭টার মধ্যে আসবেন।", "জমি রাস্তার পাশেই।", "বৃষ্টির আগে কাজ শেষ করতে হবে।", null]),
+          pick(["সকাল 7টার মধ্যে আসবেন।", "জমি রাস্তার পাশেই।", "বৃষ্টির আগে কাজ শেষ করতে হবে।", null]),
           status === "rejected" ? "ওই তারিখে অন্য জায়গায় বুকিং আছে।" : status === "accepted" ? "ঠিক সময়ে পৌঁছে যাব।" : null,
           status, status === "cancelled" ? farmer.id : null]
       );
@@ -545,10 +545,10 @@ async function seed(db) {
   // ---- Harvests -----------------------------------------------------
   if (!(await count(db, "SELECT COUNT(*) n FROM harvests WHERE farmer_id IN (?)", [farmers.map((f) => f.id)]))) {
     const plans = [
-      ["paddy", "ব্রি ধান-৮৯", "bigha", "maund"], ["potato", "ডায়মন্ড", "bigha", "kg"], ["maize", "হাইব্রিড", "bigha", "maund"],
-      ["tomato", "বারি-১৪", "decimal", "kg"], ["onion", "তাহেরপুরী", "bigha", "kg"], ["mustard", "বারি-১৪", "bigha", "maund"],
-      ["jute", "তোষা", "bigha", "maund"], ["brinjal", null, "decimal", "kg"], ["wheat", "বারি গম-৩৩", "bigha", "maund"],
-      ["lentil", "বারি মসুর-৮", "bigha", "kg"], ["cauliflower", "স্নোবল", "decimal", "piece"], ["garlic", null, "decimal", "kg"]
+      ["paddy", "ব্রি ধান-89", "bigha", "maund"], ["potato", "ডায়মন্ড", "bigha", "kg"], ["maize", "হাইব্রিড", "bigha", "maund"],
+      ["tomato", "বারি-14", "decimal", "kg"], ["onion", "তাহেরপুরী", "bigha", "kg"], ["mustard", "বারি-14", "bigha", "maund"],
+      ["jute", "তোষা", "bigha", "maund"], ["brinjal", null, "decimal", "kg"], ["wheat", "বারি গম-33", "bigha", "maund"],
+      ["lentil", "বারি মসুর-8", "bigha", "kg"], ["cauliflower", "স্নোবল", "decimal", "piece"], ["garlic", null, "decimal", "kg"]
     ];
     const statuses = ["planned", "growing", "growing", "ready", "harvesting", "completed", "completed", "completed"];
     for (const f of farmers) {
@@ -580,8 +580,8 @@ async function seed(db) {
   // ---- Expense notebooks (খরচের খাতা) -------------------------------
   if (!(await count(db, "SELECT COUNT(*) n FROM expense_notebooks WHERE farmer_id IN (?)", [farmers.map((f) => f.id)]))) {
     const BOOKS = [
-      { crop: "paddy", title: "বোরো ধান ২০২৬", season: "boro", rows: [
-        ["বীজ (ব্রি ধান-৮৯)", "seed", 20, "kg", 70], ["ইউরিয়া সার", "fertilizer", 60, "kg", 27], ["টিএসপি সার", "fertilizer", 30, "kg", 30],
+      { crop: "paddy", title: "বোরো ধান 2026", season: "boro", rows: [
+        ["বীজ (ব্রি ধান-89)", "seed", 20, "kg", 70], ["ইউরিয়া সার", "fertilizer", 60, "kg", 27], ["টিএসপি সার", "fertilizer", 30, "kg", 30],
         ["জমি চাষ (ট্রাক্টর)", "land_preparation", 3, "bigha", 1200], ["সেচ", "irrigation", 3, "bigha", 2500],
         ["রোপণ শ্রমিক", "labour", 8, "day", 650], ["কীটনাশক", "pesticide", 2, "bottle", 450], ["ধান কাটা (হারভেস্টার)", "machinery_rent", 3, "bigha", 3500] ] },
       { crop: "potato", title: "আলু চাষ — রবি মৌসুম", season: "rabi", rows: [
@@ -590,7 +590,7 @@ async function seed(db) {
       { crop: "tomato", title: "টমেটো খেত", season: "rabi", rows: [
         ["চারা", "seed", 1500, "piece", 3], ["জৈব সার", "fertilizer", 10, "bag", 400], ["মাচা ও খুঁটি", "other", 1, "lot", 4500],
         ["কীটনাশক স্প্রে", "pesticide", 4, "time", 600], ["শ্রমিক", "labour", 10, "day", 550] ] },
-      { crop: "maize", title: "ভুট্টা ২০২৬", season: "rabi", rows: [
+      { crop: "maize", title: "ভুট্টা 2026", season: "rabi", rows: [
         ["হাইব্রিড বীজ", "seed", 8, "kg", 650], ["সার", "fertilizer", 120, "kg", 28], ["জমি বর্গা", "land_lease", 1, "season", 18000],
         ["সেচ", "irrigation", 5, "time", 1000], ["মাড়াই", "machinery_rent", 1, "lot", 6000] ] },
       { crop: "mango", title: "আম বাগান পরিচর্যা", season: "year_round", rows: [

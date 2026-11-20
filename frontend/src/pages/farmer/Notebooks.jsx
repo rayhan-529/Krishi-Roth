@@ -44,7 +44,7 @@ export function NotebookForm({ notebook, onClose, onSaved }) {
   return (
     <Modal open title={notebook ? tr('খাতার তথ্য', 'Notebook details') : tr('নতুন খরচের খাতা', 'New expense notebook')} onClose={onClose}>
       <form onSubmit={submit} className="form" noValidate>
-        <Input label={tr('খাতার নাম', 'Notebook title')} placeholder={tr('যেমন: বোরো ধান ২০২৬', 'e.g. Boro rice 2026')} required maxLength={150} {...bind('title')} />
+        <Input label={tr('খাতার নাম', 'Notebook title')} placeholder={tr('যেমন: বোরো ধান 2026', 'e.g. Boro rice 2026')} required maxLength={150} {...bind('title')} />
         <Select
           label={tr('কোন ফসলের রেকর্ডের সঙ্গে যুক্ত (ঐচ্ছিক)', 'Linked harvest record (optional)')}
           value={values.harvest_id}

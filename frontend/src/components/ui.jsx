@@ -252,7 +252,7 @@ export function ConfirmButton({ children, title, message, onConfirm, className =
 
   async function confirm() {
     if (reasonLabel && reason.trim().length < 3) {
-      setError(tr('কারণ লিখুন (কমপক্ষে ৩ অক্ষর)।', 'Write a reason (at least 3 characters).'))
+      setError(tr('কারণ লিখুন (কমপক্ষে 3 অক্ষর)।', 'Write a reason (at least 3 characters).'))
       return
     }
     setBusy(true)

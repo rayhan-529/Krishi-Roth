@@ -15,7 +15,7 @@ const EXAMPLES = [
   ['ধানে কোন সার ব্যবহার করা উচিত?', 'Which fertilizer should I use for rice?'],
   ['ধান কখন কাটতে হবে?', 'When should I harvest rice?'],
   ['উৎপাদন খরচ কীভাবে কমানো যায়?', 'How can I reduce production costs?'],
-  ['১ বিঘা জমিতে কত কেজি ধানের বীজ লাগে?', 'How much rice seed do I need for 1 bigha?'],
+  ['1 বিঘা জমিতে কত কেজি ধানের বীজ লাগে?', 'How much rice seed do I need for 1 bigha?'],
 ]
 
 export default function Chatbot() {
@@ -147,7 +147,7 @@ export default function Chatbot() {
               <textarea className="input" rows={2} value={text} maxLength={2000} onChange={(e) => setText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), send())} placeholder={tr('আপনার প্রশ্ন লিখুন...', 'Type your question...')} />
               <button type="submit" className="btn btn-primary" disabled={sending || text.trim().length < 2} aria-label={tr('পাঠান', 'Send')}><Icon name="send" size={18} /></button>
             </form>
-            <p className="source-note"><Icon name="info" size={14} /> {tr('এআই-এর উত্তর সাধারণ পরামর্শ। সার/কীটনাশকের মাত্রা উপজেলা কৃষি কর্মকর্তা বা কৃষি কল সেন্টার (১৬১২৩)-এ মিলিয়ে নিন।', 'AI answers are general advice. Confirm fertilizer or pesticide doses with your Upazila Agriculture Officer or the agriculture call centre (16123).')}</p>
+            <p className="source-note"><Icon name="info" size={14} /> {tr('এআই-এর উত্তর সাধারণ পরামর্শ। সার/কীটনাশকের মাত্রা উপজেলা কৃষি কর্মকর্তা বা কৃষি কল সেন্টার (16123)-এ মিলিয়ে নিন।', 'AI answers are general advice. Confirm fertilizer or pesticide doses with your Upazila Agriculture Officer or the agriculture call centre (16123).')}</p>
           </section>
         </div>
       )}
