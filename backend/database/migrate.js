@@ -33,7 +33,8 @@ const COLUMNS = [
   ["trade_records", "escrow_settled_at", "DATETIME NULL"],
   ["trade_records", "auto_release_at", "DATETIME NULL"],
   // v1.6: chatbot answers remember which knowledge-base documents they used
-  ["chatbot_messages", "sources", "TEXT NULL"]
+  ["chatbot_messages", "sources", "TEXT NULL"],
+  ["kb_documents", "content_hash", "CHAR(64) NULL"]
 ];
 
 function createStatement(schema, table) {
@@ -66,6 +67,9 @@ async function runMigrations(conn = db) {
 
   // 1. Columns (each ALTER on its own, for TiDB/MySQL compatibility)
   for (const [table, column, definition, uniqueIndex] of COLUMNS) {
+    // A table that does not exist yet is created below from schema.sql, which already has the column.
+    const [tableRows] = await conn.query("SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?", [dbName, table]);
+    if (tableRows.length === 0) continue;
     if (!(await columnType(table, column))) {
       await conn.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${definition}`);
       changes.push(`added ${table}.${column}`);

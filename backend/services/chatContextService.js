@@ -13,7 +13,8 @@ const weather = require("./weatherService");
 const { adviceFor } = require("./weatherAdvice");
 
 const TOPICS = {
-  price: /দাম|দর|বাজারদর|বাজার দর|মূল্য|কত টাকা|কেজি কত|মণ কত|price|rate|cost of|market/i,
+  // (?<![ঀ-৿]) = not inside a longer Bangla word, so "বাদামি" (brown) is not read as "দাম" (price)
+  price: /(?<![ঀ-৿])(দাম|দর(?!কার|জা)|মূল্য)|বাজারদর|বাজার দর|কত টাকা|কেজি কত|মণ কত|price|rate|cost of|market/i,
   weather: /আবহাওয়া|আবহাওয়া|বৃষ্টি|ঝড়|ঝড়|তাপমাত্রা|গরম|শীত|কুয়াশা|কুয়াশা|রোদ|বাতাস|বন্যা|weather|rain|storm|temperature|forecast|wind|fog/i,
   wallet: /ব্যালেন্স|ওয়ালেট|ওয়ালেট|জমা|টাকা তোল|টাকা উত্তোলন|উইথড্র|ডিপোজিট|balance|wallet|deposit|withdraw/i,
   trades: /লেনদেন|অর্ডার|ট্রেড|ডেলিভারি|প্রস্তাব|অফার|কেনা|বিক্রি|সেফ ট্রেড|trade|order|delivery|offer|purchase|escrow/i

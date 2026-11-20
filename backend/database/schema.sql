@@ -974,6 +974,7 @@ CREATE TABLE IF NOT EXISTS kb_documents (
   char_count   INT UNSIGNED  NOT NULL DEFAULT 0,
   chunk_count  INT UNSIGNED  NOT NULL DEFAULT 0,
   is_builtin   TINYINT(1)    NOT NULL DEFAULT 0,
+  content_hash CHAR(64)      NULL,
   created_by   INT UNSIGNED  NULL,
   created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),

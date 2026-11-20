@@ -10,6 +10,7 @@
  * All chunk vectors are kept in memory (a few thousand chunks = a few MB), so a
  * search is a fast in-process dot product with no extra vector database.
  */
+const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const db = require("../config/db");
@@ -21,7 +22,7 @@ const MIN_SCORE = 0.62; // below this a chunk is not really about the question (
 const MAX_DOC_CHARS = 400000; // about 150 pages of text per document
 
 const SITE_GUIDE_TITLE = "Krishi Roth site guide (কৃষি রথ ব্যবহার নির্দেশিকা)";
-const SITE_GUIDE_FILE = path.join(__dirname, "..", "knowledge", "site-guide.md");
+const KNOWLEDGE_DIR = path.join(__dirname, "..", "knowledge");
 
 let cache = null; // [{ id, documentId, title, source, content, vector }]
 
@@ -123,7 +124,7 @@ function invalidate() {
  * Splits, embeds and saves a document.
  * @returns {Promise<{ id: number, chunk_count: number, char_count: number }>}
  */
-async function addDocument({ title, text, source = null, fileName = null, userId = null, builtin = false }) {
+async function addDocument({ title, text, source = null, fileName = null, userId = null, builtin = false, contentHash = null }) {
   const body = clean(text).slice(0, MAX_DOC_CHARS);
   const chunks = chunkText(body);
   if (chunks.length === 0) {
@@ -138,8 +139,8 @@ async function addDocument({ title, text, source = null, fileName = null, userId
   try {
     await conn.beginTransaction();
     const [doc] = await conn.query(
-      "INSERT INTO kb_documents (title, source, file_name, char_count, chunk_count, is_builtin, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [title, source, fileName, body.length, chunks.length, builtin ? 1 : 0, userId]
+      "INSERT INTO kb_documents (title, source, file_name, char_count, chunk_count, is_builtin, content_hash, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [title, source, fileName, body.length, chunks.length, builtin ? 1 : 0, contentHash, userId]
     );
     for (let i = 0; i < chunks.length; i += 200) {
       const rows = chunks.slice(i, i + 200).map((content, j) => [doc.insertId, i + j, content, emb.toBuffer(vectors[i + j])]);
@@ -200,14 +201,62 @@ async function search(question, { limit = 5, minScore = MIN_SCORE } = {}) {
  * (and again whenever the file changes), so the chatbot can explain the site.
  */
 async function syncSiteGuide() {
-  if (!emb.isConfigured() || !fs.existsSync(SITE_GUIDE_FILE)) return null;
-  const text = fs.readFileSync(SITE_GUIDE_FILE, "utf8");
-  const [rows] = await db.query("SELECT id, char_count FROM kb_documents WHERE is_builtin = 1 AND title = ?", [SITE_GUIDE_TITLE]);
-  const existing = rows[0];
-  if (existing && existing.char_count === clean(text).length) return null;
-  const added = await addDocument({ title: SITE_GUIDE_TITLE, text, source: "krishiroth.com", fileName: "site-guide.md", builtin: true });
-  if (existing) await deleteDocument(existing.id);
-  return added;
+  return syncBuiltinDocuments();
 }
 
-module.exports = { extractText, chunkText, addDocument, deleteDocument, listDocuments, documentChunks, search, syncSiteGuide, MIN_SCORE };
+/**
+ * Reads "title:" and "source:" from a small header at the top of a .md file:
+ *   ---
+ *   title: বোরো ধান চাষ
+ *   source: BAMIS, DAE
+ *   ---
+ */
+function parseFrontMatter(raw, fileName) {
+  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
+  const meta = {};
+  if (match) {
+    for (const line of match[1].split(/\r?\n/)) {
+      const at = line.indexOf(":");
+      if (at > 0) meta[line.slice(0, at).trim()] = line.slice(at + 1).trim();
+    }
+  }
+  return {
+    title: meta.title || (fileName === "site-guide.md" ? SITE_GUIDE_TITLE : fileName.replace(/\.md$/, "")),
+    source: meta.source || (fileName === "site-guide.md" ? "krishiroth.com" : null),
+    text: match ? raw.slice(match[0].length) : raw
+  };
+}
+
+/**
+ * Keeps the knowledge base in step with backend/knowledge/*.md: new files are
+ * added, changed files re-embedded, deleted files removed. Runs at server start,
+ * so the live site gets the same documents on every deploy.
+ * @returns {Promise<{ added: string[], removed: number } | null>}
+ */
+async function syncBuiltinDocuments() {
+  if (!emb.isConfigured() || !fs.existsSync(KNOWLEDGE_DIR)) return null;
+  const files = fs.readdirSync(KNOWLEDGE_DIR).filter((f) => f.endsWith(".md")).sort();
+  const [rows] = await db.query("SELECT id, file_name, content_hash FROM kb_documents WHERE is_builtin = 1");
+  const added = [];
+  for (const fileName of files) {
+    const raw = fs.readFileSync(path.join(KNOWLEDGE_DIR, fileName), "utf8");
+    const hash = crypto.createHash("sha256").update(raw).digest("hex");
+    const existing = rows.filter((r) => r.file_name === fileName);
+    if (existing.length === 1 && existing[0].content_hash === hash) continue;
+    const doc = parseFrontMatter(raw, fileName);
+    // Add the new version first, then drop the old one, so the bot never has a gap.
+    await addDocument({ ...doc, fileName, builtin: true, contentHash: hash });
+    for (const old of existing) await deleteDocument(old.id);
+    added.push(doc.title);
+  }
+  let removed = 0;
+  for (const r of rows) {
+    if (!files.includes(r.file_name)) {
+      await deleteDocument(r.id);
+      removed++;
+    }
+  }
+  return added.length || removed ? { added, removed } : null;
+}
+
+module.exports = { extractText, chunkText, addDocument, deleteDocument, listDocuments, documentChunks, search, syncSiteGuide, syncBuiltinDocuments, MIN_SCORE };

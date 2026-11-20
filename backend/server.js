@@ -23,7 +23,7 @@ const { PUBLIC_DIR } = require("./middleware/upload");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 const { startScheduler } = require("./services/reminderService");
 const { runMigrations } = require("./database/migrate");
-const { syncSiteGuide } = require("./services/knowledgeService");
+const { syncBuiltinDocuments } = require("./services/knowledgeService");
 const { storageDriver } = require("./services/storageService");
 const { status: aiStatus } = require("./services/aiService");
 const apiRoutes = require("./routes");
@@ -98,9 +98,9 @@ app.listen(config.port, async () => {
   } catch (error) {
     console.error("WARNING: database upgrade failed:", error.message);
   }
-  // Load or refresh the built-in site guide in the chatbot's knowledge base (needs the AI key).
-  syncSiteGuide()
-    .then((added) => added && console.log(`Chatbot knowledge: site guide loaded (${added.chunk_count} passages)`))
-    .catch((error) => console.error("WARNING: chatbot site guide not loaded:", error.message));
+  // Load new or changed backend/knowledge/*.md into the chatbot's knowledge base (needs the AI key).
+  syncBuiltinDocuments()
+    .then((r) => r && console.log(`Chatbot knowledge: ${r.added.length} document(s) loaded, ${r.removed} removed`))
+    .catch((error) => console.error("WARNING: chatbot knowledge not loaded:", error.message));
   startScheduler();
 });
