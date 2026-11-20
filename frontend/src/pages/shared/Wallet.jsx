@@ -12,7 +12,7 @@ import { get, post } from '../../services/api'
 import { label } from '../../utils/labels'
 import { dateTime, money, num } from '../../utils/format'
 import Icon from '../../components/Icon'
-import CardSoon from '../../components/CardSoon'
+import CardSoon, { PayLogo } from '../../components/CardSoon'
 import { SecurityCodeField, useTwoFactorStatus } from '../../components/SecurityCode'
 import { Alert, EmptyState, ErrorBox, Input, Loader, Modal, PageHeader, Pagination, Select, StatusBadge, SubmitButton, Tabs } from '../../components/ui'
 
@@ -69,7 +69,8 @@ function DepositForm({ info, onDone }) {
       <div className="method-picker" role="radiogroup">
         {methods.map((m) => (
           <button type="button" key={m.method} role="radio" aria-checked={values.method === m.method} className={`method-${m.method} ${values.method === m.method ? 'selected' : ''}`} onClick={() => set('method', m.method)}>
-            {label('walletMethod', m.method, lang)}
+            <PayLogo method={m.method} name={label('walletMethod', m.method, lang)} />
+            <span>{label('walletMethod', m.method, lang)}</span>
           </button>
         ))}
       </div>

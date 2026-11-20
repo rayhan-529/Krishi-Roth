@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom'
 import { useLang } from '../context/LanguageContext'
 import Icon from './Icon'
 import { BrandMark } from './Layout'
-import { CARD_BRANDS } from './CardSoon'
+import { PayLogos } from './CardSoon'
 
 const CONTACT_EMAIL = 'krishiroth@gmail.com'
 
@@ -49,12 +49,6 @@ const COLUMNS = [
       ['/terms', 'ব্যবহারের শর্তাবলি', 'Terms of service'],
     ],
   },
-]
-
-const PAYMENTS = [
-  ['bkash', 'বিকাশ', 'bKash'],
-  ['nagad', 'নগদ', 'Nagad'],
-  ['rocket', 'রকেট', 'Rocket'],
 ]
 
 function SocialIcon({ name }) {
@@ -109,18 +103,8 @@ export default function Footer() {
         ))}
 
         <div className="footer-col footer-pay">
-          <h3>{tr('পেমেন্ট মাধ্যম', 'We accept')}</h3>
-          <div className="pay-badges">
-            {PAYMENTS.map(([key, bn, en]) => (
-              <span key={key} className={`pay-badge pay-${key}`}>{tr(bn, en)}</span>
-            ))}
-          </div>
-          <div className="pay-badges pay-soon">
-            {CARD_BRANDS.map(([key, name]) => (
-              <span key={key} className={`pay-badge card-${key}`}>{name}</span>
-            ))}
-            <span className="soon-tag">{tr('শীঘ্রই আসছে', 'Coming soon')}</span>
-          </div>
+          <h3>{tr('পেমেন্ট মাধ্যম', 'Payments accepted')}</h3>
+          <PayLogos />
           <p className="footer-safe"><Icon name="shield" size={16} /> {tr('সব কেনাকাটা সেফ ট্রেডে সুরক্ষিত', 'Every purchase protected by Safe Trade')}</p>
         </div>
       </div>
