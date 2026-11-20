@@ -28,6 +28,7 @@ router.use("/reviews", require("./reviewRoutes"));
 router.use("/notifications", require("./notificationRoutes"));
 router.use("/complaints", require("./complaintRoutes"));
 router.use("/chatbot", require("./chatbotRoutes"));
+router.use("/crop-doctor", require("./cropDoctorRoutes"));
 router.use("/dashboard", require("./dashboardRoutes"));
 router.use("/admin", require("./adminRoutes"));
 
