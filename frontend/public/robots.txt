@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /farmer
+Disallow: /buyer
+Disallow: /provider
+Disallow: /wallet
+Disallow: /messages
+Disallow: /profile
+Disallow: /login/
+
+Sitemap: https://krishiroth.com/sitemap.xml
