@@ -18,6 +18,7 @@ const { logActivity } = require("../services/activityService");
 const { sendResetCode, sendLoginLink } = require("../services/mailService");
 const { verifyIdToken, isEnabled } = require("../services/socialAuthService");
 const { toPublicUser } = require("./authController");
+const { completeLogin } = require("./twoFactorController");
 
 const CODE_MINUTES = 15;
 const LINK_MINUTES = 15;
@@ -34,7 +35,8 @@ const schemas = {
   loginLink: { token: v.string().required().max(200) },
   social: {
     provider: v.enum(["google", "apple"]).required(),
-    id_token: v.string().required().max(5000)
+    id_token: v.string().required().max(5000),
+    device_token: v.string().max(200)
   }
 };
 
@@ -196,7 +198,7 @@ async function socialLogin(req, res) {
     if (user) await db.query(`UPDATE users SET ${column} = ? WHERE id = ? AND ${column} IS NULL`, [identity.sub, user.id]);
   }
 
-  if (user) return finishLogin(req, res, user, `user.login_${provider}`);
+  if (user) return completeLogin(req, res, user, `user.login_${provider}`);
 
   // No account yet: the browser finishes registration (role, phone, district).
   send(req, res, {

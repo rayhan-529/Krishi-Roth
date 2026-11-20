@@ -14,12 +14,18 @@ const db = require("../config/db");
 const { config } = require("../config/env");
 
 /** New tables, in dependency order. Their definitions are read from schema.sql. */
-const TABLES = ["auth_codes", "wallets", "wallet_deposits", "wallet_withdrawals", "wallet_transactions", "wallet_sms"];
+const TABLES = ["auth_codes", "trusted_devices", "wallets", "wallet_deposits", "wallet_withdrawals", "wallet_transactions", "wallet_sms"];
+
+/** Every purpose auth_codes must accept (checked against the live ENUM). */
+const AUTH_CODE_PURPOSES = ["password_reset", "login_link", "login_2fa", "enable_2fa", "disable_2fa", "withdraw", "password_change"];
 
 const COLUMNS = [
   // v1.2: Google / Apple sign-in
   ["users", "google_id", "VARCHAR(64) NULL", "uq_users_google"],
   ["users", "apple_id", "VARCHAR(64) NULL", "uq_users_apple"],
+  // v1.4: two-step verification
+  ["users", "two_factor_enabled", "TINYINT(1) NOT NULL DEFAULT 0"],
+  ["users", "two_factor_method", "ENUM('email','sms') NOT NULL DEFAULT 'email'"],
   // v1.3: Safe Trade escrow
   ["trade_records", "escrow_status", "ENUM('none','held','released','refunded') NOT NULL DEFAULT 'none'"],
   ["trade_records", "escrow_amount", "DECIMAL(14,2) NULL"],
@@ -88,6 +94,23 @@ async function runMigrations(conn = db) {
       await conn.query(createStatement(schema, table));
       changes.push(`created table ${table}`);
     }
+  }
+
+  // 4. auth_codes created by an earlier version: new purposes + 2FA login challenge
+  const purposeType = await columnType("auth_codes", "purpose");
+  if (purposeType && AUTH_CODE_PURPOSES.some((p) => !purposeType.includes(`'${p}'`))) {
+    await conn.query(
+      `ALTER TABLE auth_codes MODIFY purpose ENUM(${AUTH_CODE_PURPOSES.map((p) => `'${p}'`).join(",")}) NOT NULL`
+    );
+    changes.push("auth_codes.purpose allows two-step codes");
+  }
+  if (!(await columnType("auth_codes", "challenge_hash"))) {
+    await conn.query("ALTER TABLE auth_codes ADD COLUMN challenge_hash CHAR(64) NULL");
+    changes.push("added auth_codes.challenge_hash");
+  }
+  if (!(await indexExists("auth_codes", "idx_auth_codes_challenge"))) {
+    await conn.query("ALTER TABLE auth_codes ADD KEY idx_auth_codes_challenge (challenge_hash)");
+    changes.push("added index idx_auth_codes_challenge");
   }
 
   return changes;

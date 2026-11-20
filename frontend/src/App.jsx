@@ -21,6 +21,7 @@ const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const ForgotPassword = lazy(() => import('./pages/auth/ForgotPassword'))
 const LoginLink = lazy(() => import('./pages/auth/LoginLink'))
+const TwoFactorLogin = lazy(() => import('./pages/auth/TwoFactorLogin'))
 const MarketPrices = lazy(() => import('./pages/market/MarketPrices'))
 const Marketplace = lazy(() => import('./pages/market/Marketplace'))
 const ListingDetails = lazy(() => import('./pages/market/ListingDetails'))
@@ -96,6 +97,7 @@ export default function App() {
               <Route path="register" element={<Register />} />
               <Route path="forgot-password" element={<ForgotPassword />} />
               <Route path="login/link" element={<LoginLink />} />
+              <Route path="login/verify" element={<TwoFactorLogin />} />
               <Route path="market-prices" element={<MarketPrices />} />
               <Route path="marketplace" element={<Marketplace />} />
               <Route path="listings/:id" element={<ListingDetails />} />

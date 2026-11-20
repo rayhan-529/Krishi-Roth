@@ -82,6 +82,8 @@ CREATE TABLE IF NOT EXISTS users (
   password_changed_at  DATETIME          NULL,
   google_id            VARCHAR(64)       NULL,
   apple_id             VARCHAR(64)       NULL,
+  two_factor_enabled   TINYINT(1)        NOT NULL DEFAULT 0,
+  two_factor_method    ENUM('email','sms') NOT NULL DEFAULT 'email',
   created_at           DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at           DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
@@ -122,23 +124,48 @@ CREATE TABLE IF NOT EXISTS user_sessions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
--- 3c. One-time email codes
---     Password-reset codes (6 digits) and sign-in links. Only a SHA-256
---     hash is stored; each code expires, allows few attempts and is used once.
+-- 3c. One-time codes
+--     Password-reset codes, sign-in links and two-step verification codes
+--     (new-device login, withdrawal, password change, turning 2FA on/off).
+--     Only a SHA-256 hash is stored; each code expires, allows few attempts
+--     and is used once. challenge_hash ties a 2FA login code to one login try.
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS auth_codes (
-  id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  user_id     INT UNSIGNED NOT NULL,
-  purpose     ENUM('password_reset','login_link') NOT NULL,
-  code_hash   CHAR(64)     NOT NULL,
-  attempts    TINYINT UNSIGNED NOT NULL DEFAULT 0,
-  expires_at  DATETIME     NOT NULL,
-  used_at     DATETIME     NULL,
-  created_at  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id         INT UNSIGNED NOT NULL,
+  purpose         ENUM('password_reset','login_link','login_2fa','enable_2fa','disable_2fa','withdraw','password_change') NOT NULL,
+  code_hash       CHAR(64)     NOT NULL,
+  challenge_hash  CHAR(64)     NULL,
+  attempts        TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  expires_at      DATETIME     NOT NULL,
+  used_at         DATETIME     NULL,
+  created_at      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_auth_codes_user (user_id, purpose, used_at),
   KEY idx_auth_codes_hash (code_hash),
+  KEY idx_auth_codes_challenge (challenge_hash),
   CONSTRAINT fk_auth_codes_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
+-- 3d. Trusted devices (two-step verification)
+--     After a correct code with "remember this device", the browser keeps a
+--     random token; only its hash is stored. That device skips the code
+--     until the row expires or the user removes it.
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS trusted_devices (
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  user_id       INT UNSIGNED NOT NULL,
+  token_hash    CHAR(64)     NOT NULL,
+  label         VARCHAR(120) NULL,
+  ip_address    VARCHAR(45)  NULL,
+  last_used_at  DATETIME     NULL,
+  expires_at    DATETIME     NOT NULL,
+  created_at    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_trusted_devices_token (token_hash),
+  KEY idx_trusted_devices_user (user_id),
+  CONSTRAINT fk_trusted_devices_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------

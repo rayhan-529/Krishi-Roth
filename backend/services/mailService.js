@@ -91,6 +91,33 @@ function sendResetCode(user, code, minutes) {
   });
 }
 
+/** What each two-step code is for, shown in the email/SMS. [bengali, english] */
+const PURPOSE_TEXT = {
+  login_2fa: ["নতুন ডিভাইস থেকে লগইন", "Sign-in from a new device"],
+  withdraw: ["ওয়ালেট থেকে টাকা তোলা", "Withdrawing from your wallet"],
+  password_change: ["পাসওয়ার্ড পরিবর্তন", "Changing your password"],
+  enable_2fa: ["টু-স্টেপ ভেরিফিকেশন চালু করা", "Turning on two-step verification"],
+  disable_2fa: ["টু-স্টেপ ভেরিফিকেশন বন্ধ করা", "Turning off two-step verification"]
+};
+
+/** Two-step verification code email. */
+function sendSecurityCode(user, code, minutes, purpose) {
+  const bn = user.preferred_language !== "en";
+  const [whatBn, whatEn] = PURPOSE_TEXT[purpose] || ["নিরাপত্তা যাচাই", "Security check"];
+  const intro = bn
+    ? `${user.name}, ${whatBn}-এর জন্য নিচের কোডটি দিন।`
+    : `Hi ${user.name}, enter this code to confirm: ${whatEn.toLowerCase()}.`;
+  const footer = bn
+    ? `কোডটি ${minutes} মিনিট পর্যন্ত কার্যকর। কাউকে বলবেন না। আপনি এটা না করে থাকলে এখনই পাসওয়ার্ড বদলান।`
+    : `The code expires in ${minutes} minutes. Never share it. If this was not you, change your password now.`;
+  return sendMail({
+    to: user.email,
+    subject: bn ? `কৃষি রথ যাচাই কোড: ${code}` : `Krishi Roth security code: ${code}`,
+    text: `${intro}\n\n${code}\n\n${footer}`,
+    html: layout({ heading: bn ? whatBn : whatEn, intro, code, footer })
+  });
+}
+
 /** One-click sign-in link email. */
 function sendLoginLink(user, url, minutes) {
   const bn = user.preferred_language !== "en";
@@ -112,4 +139,4 @@ function sendLoginLink(user, url, minutes) {
   });
 }
 
-module.exports = { isConfigured, getTransporter, sendMail, sendResetCode, sendLoginLink };
+module.exports = { isConfigured, getTransporter, sendMail, sendResetCode, sendLoginLink, sendSecurityCode, PURPOSE_TEXT };

@@ -21,6 +21,7 @@ const { notify, notifyMany } = require("../services/notificationService");
 const { logActivity } = require("../services/activityService");
 const { releaseDueEscrows } = require("../services/escrowService");
 const { matchDeposit } = require("../services/smsPaymentService");
+const { requireCodeFor } = require("../services/twoFactorService");
 const smsWebhook = require("./walletSmsController");
 
 const METHODS = ["bkash", "nagad", "rocket"];
@@ -58,7 +59,9 @@ const schemas = {
   withdraw: {
     method: v.enum(METHODS).required(),
     account_number: accountNumber(),
-    amount: v.number().required()
+    amount: v.number().required(),
+    // Needed when two-step verification is on
+    code: v.string().max(6)
   },
   adminList: { status: v.string().max(20), q: v.string().max(100), ...paging },
   reviewDeposit: { action: v.enum(["approve", "reject"]).required(), note: v.string().max(300) },
@@ -200,6 +203,7 @@ async function createWithdrawal(req, res) {
   if (!(amount >= config.wallet.minWithdrawal)) {
     throw amountError(`কমপক্ষে ৳${config.wallet.minWithdrawal} তুলতে পারবেন।`, `The minimum withdrawal is ৳${config.wallet.minWithdrawal}.`);
   }
+  await requireCodeFor(req.user.id, "withdraw", data.code);
 
   const id = await withTransaction(async (conn) => {
     const [result] = await conn.query(

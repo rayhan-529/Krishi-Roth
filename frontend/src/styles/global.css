@@ -2201,3 +2201,19 @@ a.stat-card:hover { transform: translateY(-2px); border-top-color: var(--tone); 
 .sms-status small { color: var(--muted); font-size: 0.82rem; }
 .sms-status.on { background: var(--green-softer); border-color: #c7e7d2; color: var(--green-dark); }
 .sms-status.off { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+
+/* ---------------------------------------------------------------- two-step verification */
+.security-code-row { display: flex; gap: 0.6rem; align-items: flex-start; }
+.security-code-row .field { flex: 1; }
+.security-code-row > .btn { margin-top: 1.7rem; min-height: 42px; flex-shrink: 0; }
+.code-input-sm { font-size: 1.2rem; letter-spacing: 0.4em; }
+.tf-method { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; font-size: 0.92rem; padding: 0.6rem 0.8rem; background: var(--green-softer); border-radius: var(--radius-sm); }
+.tf-sub { font-size: 0.9rem; margin: 1rem 0 0.4rem; }
+.tf-devices { list-style: none; padding: 0; margin: 0; }
+.tf-devices li { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+.tf-devices li:last-child { border-bottom: 0; }
+.tf-devices li > span { flex: 1; display: grid; }
+.tf-devices small { color: var(--muted); font-size: 0.78rem; }
+.tf-setup { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--border); }
+.method-picker button:disabled { opacity: 0.5; cursor: not-allowed; }
+.method-picker button small { font-weight: 400; }

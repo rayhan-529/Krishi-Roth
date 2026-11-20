@@ -31,6 +31,17 @@ const emailLimiter = rateLimit({
   limit: 5
 });
 
+/**
+ * Two-step codes: 8 per 15 minutes per USER (per IP before login), so people
+ * sharing one network (a campus, a mobile operator) do not block each other.
+ */
+const codeLimiter = rateLimit({
+  ...common,
+  windowMs: 15 * 60 * 1000,
+  limit: 8,
+  keyGenerator: (req) => (req.user ? `user-${req.user.id}` : ipKeyGenerator(req.ip))
+});
+
 /** AI chatbot: 20 messages per 10 minutes per user. */
 const chatbotLimiter = rateLimit({
   ...common,
@@ -46,4 +57,4 @@ const apiLimiter = rateLimit({
   limit: 600
 });
 
-module.exports = { authLimiter, emailLimiter, chatbotLimiter, apiLimiter };
+module.exports = { authLimiter, emailLimiter, codeLimiter, chatbotLimiter, apiLimiter };

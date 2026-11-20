@@ -3,7 +3,7 @@
  *   const { user, login, register, logout, refreshUser } = useAuth()
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { get, getToken, onUnauthorized, post, setToken } from '../services/api'
+import { get, getDeviceToken, getToken, onUnauthorized, post, setDeviceToken, setToken } from '../services/api'
 import { useLang } from './LanguageContext'
 
 const AuthContext = createContext(null)
@@ -42,8 +42,19 @@ export function AuthProvider({ children }) {
     [setLang],
   )
 
+  /**
+   * Returns the user, or { twoFactor } when a code is needed first (new device);
+   * then call verifyTwoFactor() with the code.
+   */
   const login = useCallback(async (identifier, password) => {
-    const body = await post('/auth/login', { identifier, password })
+    const body = await post('/auth/login', { identifier, password, device_token: getDeviceToken() })
+    if (body.data.two_factor_required) return { twoFactor: body.data }
+    return startSession(body.data)
+  }, [startSession])
+
+  const verifyTwoFactor = useCallback(async (challenge, code, rememberDevice) => {
+    const body = await post('/auth/login/verify', { challenge, code, remember_device: rememberDevice })
+    if (body.data.device_token) setDeviceToken(body.data.device_token)
     return startSession(body.data)
   }, [startSession])
 
@@ -68,8 +79,8 @@ export function AuthProvider({ children }) {
   }, [])
 
   const value = useMemo(
-    () => ({ user, loading, login, register, logout, refreshUser, startSession, setUser }),
-    [user, loading, login, register, logout, refreshUser, startSession],
+    () => ({ user, loading, login, verifyTwoFactor, register, logout, refreshUser, startSession, setUser }),
+    [user, loading, login, verifyTwoFactor, register, logout, refreshUser, startSession],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

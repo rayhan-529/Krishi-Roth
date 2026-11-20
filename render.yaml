@@ -69,3 +69,12 @@ services:
         sync: false
       - key: WALLET_SMS_SECRET
         generateValue: true
+      # ---- Two-step verification ----
+      - key: SMS_PROVIDER
+        value: alpha
+      - key: SMS_API_KEY
+        sync: false
+      - key: SMS_SENDER_ID
+        sync: false
+      - key: ADMIN_REQUIRE_2FA
+        value: "false"

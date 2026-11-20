@@ -14,6 +14,8 @@ const { notify } = require("../services/notificationService");
 const { logActivity } = require("../services/activityService");
 const crypto = require("crypto");
 const { verifyIdToken } = require("../services/socialAuthService");
+const { completeLogin } = require("./twoFactorController");
+const { requireCodeFor } = require("../services/twoFactorService");
 
 // Roles a person may choose when registering. Admin is never allowed.
 const REGISTER_ROLES = ["farmer", "buyer", "labour", "harvester_owner", "tractor_owner", "transport_owner"];
@@ -39,11 +41,15 @@ const schemas = {
   },
   login: {
     identifier: v.string().required().max(150),
-    password: v.string().required().max(200)
+    password: v.string().required().max(200),
+    // "Remember this device" token from an earlier two-step login
+    device_token: v.string().max(200)
   },
   changePassword: {
     current_password: v.string().required(),
-    new_password: v.string().required()
+    new_password: v.string().required(),
+    // Needed when two-step verification is on
+    code: v.string().max(6)
   }
 };
 
@@ -174,14 +180,8 @@ async function login(req, res) {
     );
   }
 
-  await db.query("UPDATE users SET last_login_at = NOW() WHERE id = ?", [user.id]);
-  req.user = user;
-  await logActivity(req, "user.login", "user", user.id);
-
-  send(req, res, {
-    message: ["লগইন সফল হয়েছে।", "Logged in successfully."],
-    data: { ...(await issueToken(user, req)), user: toPublicUser(user) }
-  });
+  // Issues the token, or asks for a two-step code first (new device).
+  await completeLogin(req, res, user, "user.login");
 }
 
 async function me(req, res) {
@@ -212,6 +212,9 @@ async function changePassword(req, res) {
 
   const problem = checkPasswordStrength(next);
   if (problem) throw passwordError(problem);
+
+  // With two-step verification on, a code is also needed.
+  await requireCodeFor(req.user.id, "password_change", req.body.code);
 
   if (current === next) {
     const message = { bn: "নতুন পাসওয়ার্ড আগের থেকে আলাদা হতে হবে।", en: "The new password must be different." };

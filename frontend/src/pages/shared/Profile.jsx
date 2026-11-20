@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useLang } from '../../context/LanguageContext'
 import { useToast } from '../../context/ToastContext'
 import { useFetch, useForm } from '../../hooks/useFetch'
-import { get, post, put, setToken, toFormData } from '../../services/api'
+import { del, get, post, put, setDeviceToken, setToken, toFormData } from '../../services/api'
 import { label, options } from '../../utils/labels'
 import { date, dateTime } from '../../utils/format'
 import LocationFields from '../../components/LocationFields'
@@ -14,6 +14,7 @@ import { PasswordInput } from '../auth/Login'
 import Icon from '../../components/Icon'
 import PasswordChecklist from '../../components/PasswordChecklist'
 import { isStrongPassword } from '../../utils/password'
+import { SecurityCodeField } from '../../components/SecurityCode'
 
 function ProfileForm({ profile, onSaved }) {
   const { tr, setLang } = useLang()
@@ -58,12 +59,12 @@ function ProfileForm({ profile, onSaved }) {
   )
 }
 
-function PasswordForm() {
+function PasswordForm({ twoFactorOn }) {
   const { tr } = useLang()
   const { startSession } = useAuth()
   const toast = useToast()
   const [busy, setBusy] = useState(false)
-  const { values, setValues, bind, setErrors } = useForm({ current_password: '', new_password: '', confirm: '' })
+  const { values, setValues, bind, set, errors, setErrors } = useForm({ current_password: '', new_password: '', confirm: '', code: '' })
 
   async function submit(event) {
     event.preventDefault()
@@ -77,10 +78,10 @@ function PasswordForm() {
     }
     setBusy(true)
     try {
-      const body = await post('/auth/change-password', { current_password: values.current_password, new_password: values.new_password })
+      const body = await post('/auth/change-password', { current_password: values.current_password, new_password: values.new_password, code: twoFactorOn ? values.code : undefined })
       startSession(body.data) // a fresh token for this device; other devices are logged out
       toast.success(body.message)
-      setValues({ current_password: '', new_password: '', confirm: '' })
+      setValues({ current_password: '', new_password: '', confirm: '', code: '' })
     } catch (err) {
       setErrors(err.errors)
       toast.error(err.message)
@@ -96,9 +97,151 @@ function PasswordForm() {
         <PasswordInput label={tr('নতুন পাসওয়ার্ড', 'New password')} autoComplete="new-password" required {...bind('new_password')} />
         <PasswordChecklist password={values.new_password} />
         <PasswordInput label={tr('নতুন পাসওয়ার্ড আবার', 'Confirm new password')} autoComplete="new-password" required {...bind('confirm')} />
+        {twoFactorOn && <SecurityCodeField purpose="password_change" value={values.code} onChange={(v) => set('code', v)} error={errors.code && (typeof errors.code === 'string' ? errors.code : tr(errors.code.bn, errors.code.en))} />}
         <div className="form-actions"><SubmitButton busy={busy}>{tr('পাসওয়ার্ড বদলান', 'Change password')}</SubmitButton></div>
       </form>
       <LogoutEverywhere />
+    </Card>
+  )
+}
+
+/** Two-step verification: turn on/off, choose email or SMS, trusted devices. */
+function TwoFactorCard({ status, onChanged }) {
+  const { lang, tr } = useLang()
+  const toast = useToast()
+  const [method, setMethod] = useState('email')
+  const [code, setCode] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [setup, setSetup] = useState(false)
+  if (!status) return <Card title={tr('টু-স্টেপ ভেরিফিকেশন', 'Two-step verification')}><Loader inline /></Card>
+
+  async function run(path, payload, after) {
+    setBusy(true)
+    try {
+      const body = await post(path, payload)
+      toast.success(body.message)
+      if (after) after(body)
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  const methodLabel = (m) => (m === 'sms' ? `SMS (${status.phone || '—'})` : tr(`ইমেইল (${status.email || '—'})`, `Email (${status.email || '—'})`))
+  const cancel = () => {
+    setSetup(false)
+    setCode('')
+  }
+
+  return (
+    <Card
+      title={tr('টু-স্টেপ ভেরিফিকেশন', 'Two-step verification')}
+      actions={<span className={`badge ${status.enabled ? 'badge-green' : 'badge-grey'}`}>{status.enabled ? tr('চালু', 'On') : tr('বন্ধ', 'Off')}</span>}
+    >
+      <p className="small muted">
+        {tr(
+          'চালু থাকলে নতুন ফোন/কম্পিউটার থেকে লগইন, টাকা তোলা আর পাসওয়ার্ড বদলানোর সময় একটি কোড লাগবে। কেউ পাসওয়ার্ড জেনে গেলেও আপনার অ্যাকাউন্টে ঢুকতে পারবে না।',
+          'When on, a code is needed to log in from a new phone or computer, to withdraw money and to change your password. Even someone who knows your password cannot get in.',
+        )}
+      </p>
+
+      {status.enabled ? (
+        <>
+          <p className="tf-method">
+            <Icon name={status.method === 'sms' ? 'phone' : 'mail'} size={16} /> {tr('কোড যায়', 'Codes go to')}: <strong>{methodLabel(status.method)}</strong>
+          </p>
+          {status.devices.length > 0 && (
+            <>
+              <h3 className="tf-sub">{tr('মনে রাখা ডিভাইস', 'Remembered devices')}</h3>
+              <ul className="tf-devices">
+                {status.devices.map((d) => (
+                  <li key={d.id}>
+                    <Icon name="globe" size={16} />
+                    <span>
+                      <strong>{d.label || tr('ব্রাউজার', 'Browser')}</strong>
+                      <small>{tr('শেষ ব্যবহার', 'Last used')}: {dateTime(d.last_used_at || d.created_at, lang)}</small>
+                    </span>
+                    <button
+                      type="button"
+                      className="link-btn"
+                      onClick={async () => {
+                        await del(`/auth/2fa/devices/${d.id}`).catch(() => {})
+                        onChanged()
+                      }}
+                    >
+                      {tr('সরান', 'Remove')}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {status.forced ? (
+            <p className="small muted mt">{tr('অ্যাডমিন অ্যাকাউন্টে নিরাপত্তার জন্য এটা সবসময় চালু থাকে।', 'For safety this is always on for admin accounts.')}</p>
+          ) : setup ? (
+            <div className="tf-setup">
+              <SecurityCodeField purpose="disable_2fa" value={code} onChange={setCode} />
+              <div className="form-actions start">
+                <button
+                  type="button"
+                  className="btn btn-danger-outline"
+                  disabled={busy || code.length !== 6}
+                  onClick={() => run('/auth/2fa/disable', { code }, () => {
+                    setDeviceToken(null)
+                    cancel()
+                    onChanged()
+                  })}
+                >
+                  {tr('বন্ধ করুন', 'Turn off')}
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={cancel}>{tr('বাতিল', 'Cancel')}</button>
+              </div>
+            </div>
+          ) : (
+            <button type="button" className="btn btn-sm btn-outline mt" onClick={() => setSetup(true)}>{tr('টু-স্টেপ বন্ধ করুন', 'Turn off two-step')}</button>
+          )}
+        </>
+      ) : setup ? (
+        <div className="tf-setup">
+          <p className="small"><strong>{tr('কোথায় কোড পাবেন?', 'Where should codes go?')}</strong></p>
+          <div className="method-picker">
+            <button type="button" className={method === 'email' ? 'selected' : ''} onClick={() => { setMethod('email'); setCode('') }}>
+              {tr('ইমেইল', 'Email')}
+            </button>
+            <button
+              type="button"
+              className={method === 'sms' ? 'selected' : ''}
+              disabled={!status.sms_available}
+              title={status.sms_available ? undefined : tr('SMS এখনো চালু নেই', 'SMS is not set up yet')}
+              onClick={() => { setMethod('sms'); setCode('') }}
+            >
+              SMS {!status.sms_available && <small>({tr('শীঘ্রই', 'soon')})</small>}
+            </button>
+          </div>
+          <p className="small muted">{tr('চালু করার আগে যাচাই করুন যে কোডটা আপনার কাছে পৌঁছায়:', 'First check that the code reaches you:')} {methodLabel(method)}</p>
+          <SecurityCodeField key={method} purpose="enable_2fa" method={method} value={code} onChange={setCode} />
+          <div className="form-actions start">
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={busy || code.length !== 6}
+              onClick={() => run('/auth/2fa/enable', { method, code }, (body) => {
+                setDeviceToken(body.data.device_token)
+                cancel()
+                onChanged()
+              })}
+            >
+              <Icon name="shield" size={16} /> {tr('চালু করুন', 'Turn on')}
+            </button>
+            <button type="button" className="btn btn-ghost" onClick={cancel}>{tr('বাতিল', 'Cancel')}</button>
+          </div>
+        </div>
+      ) : (
+        <button type="button" className="btn btn-primary" onClick={() => setSetup(true)}>
+          <Icon name="shield" size={16} /> {tr('টু-স্টেপ চালু করুন', 'Turn on two-step')}
+        </button>
+      )}
     </Card>
   )
 }
@@ -227,6 +370,7 @@ export default function Profile() {
   const { setUser } = useAuth()
   const toast = useToast()
   const { data: profile, loading, error, reload, setData } = useFetch(() => get('/profile'), [])
+  const twoFactor = useFetch(() => get('/auth/2fa'), [])
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
@@ -276,7 +420,8 @@ export default function Profile() {
             </div>
           </Card>
           <PendingReviews />
-          <PasswordForm />
+          <TwoFactorCard status={twoFactor.data} onChanged={twoFactor.reload} />
+          <PasswordForm twoFactorOn={Boolean(twoFactor.data && twoFactor.data.enabled)} />
         </div>
       </div>
     </div>

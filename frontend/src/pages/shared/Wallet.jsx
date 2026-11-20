@@ -12,6 +12,7 @@ import { get, post } from '../../services/api'
 import { label } from '../../utils/labels'
 import { dateTime, money, num } from '../../utils/format'
 import Icon from '../../components/Icon'
+import { SecurityCodeField, useTwoFactorStatus } from '../../components/SecurityCode'
 import { Alert, EmptyState, ErrorBox, Input, Loader, Modal, PageHeader, Pagination, Select, StatusBadge, SubmitButton, Tabs } from '../../components/ui'
 
 const TX_ICON = {
@@ -95,15 +96,17 @@ function WithdrawForm({ info, onDone }) {
   const toast = useToast()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
-  const { values, bind, set, setErrors } = useForm({ method: 'bkash', account_number: '', amount: '' })
+  const { values, bind, set, errors, setErrors } = useForm({ method: 'bkash', account_number: '', amount: '', code: '' })
   const available = info.wallet.available
+  const twoFactor = useTwoFactorStatus()
+  const needsCode = Boolean(twoFactor && twoFactor.enabled)
 
   async function submit(event) {
     event.preventDefault()
     setBusy(true)
     setError(null)
     try {
-      const body = await post('/wallet/withdrawals', { ...values, amount: Number(values.amount) })
+      const body = await post('/wallet/withdrawals', { ...values, amount: Number(values.amount), code: needsCode ? values.code : undefined })
       toast.success(body.message)
       onDone()
     } catch (err) {
@@ -132,7 +135,8 @@ function WithdrawForm({ info, onDone }) {
         required
         {...bind('amount')}
       />
-      <SubmitButton busy={busy} className="btn btn-primary btn-block btn-pill" disabled={busy || available < info.limits.min_withdrawal}>{tr('টাকা তোলার অনুরোধ', 'Request withdrawal')}</SubmitButton>
+      {needsCode && <SecurityCodeField purpose="withdraw" value={values.code} onChange={(v) => set('code', v)} error={errors.code && (typeof errors.code === 'string' ? errors.code : tr(errors.code.bn, errors.code.en))} />}
+      <SubmitButton busy={busy} className="btn btn-primary btn-block btn-pill" disabled={busy || available < info.limits.min_withdrawal || (needsCode && values.code.length !== 6)}>{tr('টাকা তোলার অনুরোধ', 'Request withdrawal')}</SubmitButton>
       {available < info.limits.min_withdrawal && <p className="small muted">{tr(`কমপক্ষে ৳${num(info.limits.min_withdrawal, lang)} থাকলে তুলতে পারবেন।`, `You can withdraw once you have at least ৳${info.limits.min_withdrawal}.`)}</p>}
     </form>
   )

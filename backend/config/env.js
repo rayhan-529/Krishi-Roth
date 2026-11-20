@@ -74,6 +74,18 @@ const config = {
     smsSecret: read("WALLET_SMS_SECRET")
   },
 
+  // SMS for two-step verification codes. Leave SMS_API_KEY empty to switch SMS off
+  // (codes then go by email). Providers: "alpha" (sms.net.bd) or "bulksmsbd" (bulksmsbd.net).
+  sms: {
+    provider: read("SMS_PROVIDER", "alpha").toLowerCase(),
+    apiKey: read("SMS_API_KEY"),
+    senderId: read("SMS_SENDER_ID")
+  },
+
+  // true = every admin must use two-step verification (turn it on for your own admin
+  // account first and check the code arrives, or admins could be locked out).
+  adminRequire2fa: ['1', 'true', 'yes'].includes(read('ADMIN_REQUIRE_2FA', 'false').toLowerCase()),
+
   // Social sign-in. Leave empty to switch a provider off.
   social: {
     googleClientId: read("GOOGLE_CLIENT_ID"),

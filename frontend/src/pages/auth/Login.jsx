@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useLang } from '../../context/LanguageContext'
 import { useToast } from '../../context/ToastContext'
 import { useForm } from '../../hooks/useFetch'
-import { post } from '../../services/api'
+import { getDeviceToken, post } from '../../services/api'
 import { HOME_BY_ROLE } from '../../utils/nav'
 import Icon from '../../components/Icon'
 import { BrandMark } from '../../components/Layout'
@@ -36,7 +36,11 @@ export function useSocialSignIn() {
   const navigate = useNavigate()
   return async function onToken(provider, idToken, name) {
     try {
-      const body = await post('/auth/social', { provider, id_token: idToken })
+      const body = await post('/auth/social', { provider, id_token: idToken, device_token: getDeviceToken() })
+      if (body.data.two_factor_required) {
+        navigate('/login/verify', { state: { twoFactor: body.data } })
+        return
+      }
       if (body.data.needs_registration) {
         const profile = body.data.profile || {}
         navigate('/register', { state: { social: { provider, id_token: idToken, name: profile.name || name || '', email: profile.email || '' } } })
@@ -109,7 +113,12 @@ export default function Login() {
     setBusy(true)
     setError(null)
     try {
-      const loggedIn = await login(values.identifier.trim(), values.password)
+      const result = await login(values.identifier.trim(), values.password)
+      if (result.twoFactor) {
+        navigate('/login/verify', { state: { twoFactor: result.twoFactor, from: location.state && location.state.from } })
+        return
+      }
+      const loggedIn = result
       toast.success(tr(`স্বাগতম, ${loggedIn.name}!`, `Welcome, ${loggedIn.name}!`))
       const from = location.state && location.state.from
       navigate(from && loggedIn.role !== 'admin' ? from : HOME_BY_ROLE[loggedIn.role], { replace: true })

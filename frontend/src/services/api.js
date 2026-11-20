@@ -29,6 +29,27 @@ export function setToken(value) {
   else localStorage.removeItem(TOKEN_KEY)
 }
 
+/**
+ * "Remember this device" token from two-step verification. It is NOT a login:
+ * it only lets this browser skip the code on the next sign-in.
+ */
+const DEVICE_KEY = 'kr_device'
+export function getDeviceToken() {
+  try {
+    return localStorage.getItem(DEVICE_KEY) || undefined
+  } catch {
+    return undefined
+  }
+}
+export function setDeviceToken(value) {
+  try {
+    if (value) localStorage.setItem(DEVICE_KEY, value)
+    else localStorage.removeItem(DEVICE_KEY)
+  } catch {
+    // storage blocked (private mode): the code is simply asked again next time
+  }
+}
+
 export function setApiLanguage(value) {
   language = value
 }
