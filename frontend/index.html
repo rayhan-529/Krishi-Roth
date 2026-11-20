@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#15803d" />
     <meta
       name="description"
-      content="কৃষি রথ — কৃষকের ফসল ন্যায্য দামে বিক্রি, বাজারদর, ফসল ও খরচের হিসাব, শ্রমিক, কৃষিযন্ত্র ও পরিবহন সেবা এক জায়গায়।"
+      content="কৃষি রথ (Krishi Roth) — কৃষকের সন্তান মো. আবু রায়হানের তৈরি কৃষকের প্ল্যাটফর্ম। ফসল ন্যায্য দামে বিক্রি, বাজারদর, ফসল ও খরচের হিসাব, শ্রমিক, কৃষিযন্ত্র ও পরিবহন সেবা এক জায়গায়।"
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -24,7 +24,47 @@
     <meta property="og:url" content="https://krishiroth.com/" />
     <meta property="og:locale" content="bn_BD" />
     <script type="application/ld+json">
-      {"@context":"https://schema.org","@type":"WebSite","name":"Krishi Roth","alternateName":["কৃষি রথ","krishiroth"],"url":"https://krishiroth.com/"}
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://krishiroth.com/#website",
+            "name": "Krishi Roth",
+            "alternateName": ["কৃষি রথ", "krishiroth", "Krishi Roth BD"],
+            "url": "https://krishiroth.com/",
+            "inLanguage": ["bn", "en"],
+            "publisher": { "@id": "https://krishiroth.com/#org" }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://krishiroth.com/#org",
+            "name": "Krishi Roth",
+            "alternateName": "কৃষি রথ",
+            "url": "https://krishiroth.com/",
+            "logo": "https://krishiroth.com/favicon.svg",
+            "email": "krishiroth@gmail.com",
+            "description": "Krishi Roth (কৃষি রথ) is a digital agriculture platform for Bangladeshi farmers: market prices, direct crop sales, weather forecasts, AI crop doctor, farm labour, machinery and transport booking, with Safe Trade payments.",
+            "areaServed": "Bangladesh",
+            "founder": { "@id": "https://krishiroth.com/about#founder" }
+          },
+          {
+            "@type": "Person",
+            "@id": "https://krishiroth.com/about#founder",
+            "name": "MD. Abu Rayhan",
+            "alternateName": "মো. আবু রায়হান",
+            "jobTitle": "Founder & Developer, Krishi Roth",
+            "description": "Software Engineering student (batch 42, intake 241) at Daffodil International University, son of a farmer from Kastoshinga village, Titpolla Union, Jamalpur Sadar, Bangladesh. He built Krishi Roth to help farmers get fair prices.",
+            "url": "https://krishiroth.com/about",
+            "alumniOf": { "@type": "CollegeOrUniversity", "name": "Daffodil International University", "url": "https://daffodilvarsity.edu.bd/" },
+            "homeLocation": { "@type": "Place", "name": "Kastoshinga, Titpolla Union, Jamalpur Sadar, Jamalpur, Bangladesh" },
+            "parent": [
+              { "@type": "Person", "name": "Amzad Ali", "jobTitle": "Farmer" },
+              { "@type": "Person", "name": "Roksana Akter" }
+            ]
+          }
+        ]
+      }
     </script>
     <title>কৃষি রথ | Krishi Roth</title>
   </head>

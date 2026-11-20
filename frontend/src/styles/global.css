@@ -2347,3 +2347,9 @@ a.stat-card:hover { transform: translateY(-2px); border-top-color: var(--tone); 
 .to-top:hover { background: #fbbf24; }
 @media print { .site-footer { display: none; } }
 .footer-social span { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.25); color: rgba(255, 255, 255, 0.78); }
+
+/* About: founder card */
+.founder-head { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; }
+.founder-head h2 { margin: 2px 0; }
+.founder-head small { color: var(--brand, #15803d); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.founder-avatar { flex: none; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 1.3rem; color: #fff; background: linear-gradient(135deg, #15803d, #ca8a04); }
