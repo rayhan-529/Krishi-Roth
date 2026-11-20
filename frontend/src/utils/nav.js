@@ -23,6 +23,7 @@ const PUBLIC = [
   ['/services/tractor', 'ট্রাক্টর', 'Tractor'],
   ['/services/transport', 'পরিবহন', 'Transport'],
   ['/chatbot', 'এআই সহায়ক', 'AI Assistant'],
+  ['/crop-doctor', 'ফসলের ডাক্তার', 'Crop Doctor'],
 ]
 
 export const MENUS = {
@@ -105,6 +106,7 @@ export const NAV_ICON = {
   '/services/tractor': 'tractor',
   '/services/transport': 'truck',
   '/chatbot': 'sparkle',
+  '/crop-doctor': 'leaf',
   '/about': 'info',
   '/provider/services': 'wrench',
   '/admin/users': 'users',

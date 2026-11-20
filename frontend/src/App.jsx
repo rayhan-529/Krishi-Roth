@@ -31,6 +31,7 @@ const MachineryRental = lazy(() => import('./pages/services/MachineryRental'))
 const TransportServices = lazy(() => import('./pages/services/TransportServices'))
 const PublicProfile = lazy(() => import('./pages/shared/PublicProfile'))
 const Chatbot = lazy(() => import('./pages/shared/Chatbot'))
+const CropDoctor = lazy(() => import('./pages/shared/CropDoctor'))
 
 // Farmer
 const FarmerDashboard = lazy(() => import('./pages/farmer/FarmerDashboard'))
@@ -109,6 +110,7 @@ export default function App() {
               <Route path="services/transport" element={<TransportServices />} />
               <Route path="users/:id" element={<PublicProfile />} />
               <Route path="chatbot" element={<Chatbot />} />
+              <Route path="crop-doctor" element={<CropDoctor />} />
               <Route path="dashboard" element={<DashboardRedirect />} />
 
               <Route element={<ProtectedRoute roles={['farmer']} />}>
