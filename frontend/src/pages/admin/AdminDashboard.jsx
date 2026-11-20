@@ -1,13 +1,18 @@
 import { Link } from 'react-router-dom'
 import { useLang } from '../../context/LanguageContext'
 import { useFetch } from '../../hooks/useFetch'
-import { get } from '../../services/api'
+import { get, post } from '../../services/api'
+import { useAuth } from '../../context/AuthContext'
+import { useToast } from '../../context/ToastContext'
+import Icon from '../../components/Icon'
 import { money, monthLabel, num, pick, timeAgo } from '../../utils/format'
 import BarChart, { HBarList } from '../../components/BarChart'
-import { Card, ErrorBox, Loader, PageHeader, StatCard } from '../../components/ui'
+import { Card, ConfirmButton, ErrorBox, Loader, PageHeader, StatCard } from '../../components/ui'
 
 export default function AdminDashboard() {
   const { lang, tr } = useLang()
+  const { user } = useAuth()
+  const toast = useToast()
   const { data: d, loading, error, reload } = useFetch(() => get('/admin/stats'), [])
   if (loading) return <Loader />
   if (error) return <div className="page"><ErrorBox error={error} onRetry={reload} /></div>
@@ -15,7 +20,30 @@ export default function AdminDashboard() {
 
   return (
     <div className="page">
-      <PageHeader banner title={tr('অ্যাডমিন ড্যাশবোর্ড', 'Admin dashboard')} />
+      <PageHeader
+        banner
+        title={tr('অ্যাডমিন ড্যাশবোর্ড', 'Admin dashboard')}
+        actions={
+          <ConfirmButton
+            className="btn btn-primary"
+            danger={false}
+            title={tr('টেস্ট email পাঠান', 'Send a test email')}
+            message={tr('সার্ভার থেকে সত্যিই email যাচ্ছে কিনা দেখুন। কোন ঠিকানায় পাঠাবেন লিখুন।', 'Check that the server can really send email. Enter the address to send to.')}
+            reasonLabel={tr('Email ঠিকানা', 'Email address') + (user.email ? ` (${user.email})` : '')}
+            confirmText={tr('পাঠান', 'Send')}
+            onConfirm={async (to) => {
+              try {
+                const body = await post('/admin/test-email', { to: to.trim() })
+                toast.success(body.message)
+              } catch (err) {
+                toast.error(err.message)
+              }
+            }}
+          >
+            <Icon name="mail" size={18} /> {tr('টেস্ট email', 'Test email')}
+          </ConfirmButton>
+        }
+      />
       <div className="stats-grid">
         <StatCard icon="👥" label={tr('মোট ব্যবহারকারী', 'Total users')} value={num(c.total_users, lang)} hint={tr(`${num(c.blocked_users, lang)}টি বন্ধ`, `${num(c.blocked_users, lang)} blocked`)} to="/admin/users" />
         <StatCard icon="👨‍🌾" label={tr('কৃষক', 'Farmers')} value={num(c.farmers, lang)} to="/admin/users?role=farmer" />

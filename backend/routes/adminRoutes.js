@@ -6,6 +6,7 @@ const express = require("express");
 const c = require("../controllers/adminController");
 const verifications = require("../controllers/verificationController");
 const wallet = require("../controllers/walletController");
+const tools = require("../controllers/adminToolsController");
 const { authenticate, authorize } = require("../middleware/auth");
 const { validateBody, validateQuery, validateId } = require("../middleware/validate");
 
@@ -15,6 +16,7 @@ const id = validateId();
 router.use(authenticate, authorize("admin"));
 
 router.get("/stats", c.stats);
+router.post("/test-email", validateBody(tools.schemas.testEmail), tools.testEmail);
 router.get("/reports", c.reports);
 router.get("/activity", validateQuery(c.schemas.activity), c.activity);
 
