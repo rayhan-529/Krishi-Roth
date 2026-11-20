@@ -6,6 +6,17 @@ const v = require("../utils/validator");
 const ApiError = require("../utils/ApiError");
 const { send } = require("../utils/response");
 const ai = require("../services/aiService");
+const kb = require("../services/knowledgeService");
+const { liveContext } = require("../services/chatContextService");
+
+function parseSources(value) {
+  if (!value) return [];
+  try {
+    return JSON.parse(value);
+  } catch {
+    return [];
+  }
+}
 
 const HISTORY_MESSAGES = 12; // earlier messages sent to the AI for context
 
@@ -40,10 +51,11 @@ async function findOwn(req, id) {
 async function messages(req, res) {
   const conversation = await findOwn(req, req.params.id);
   const [rows] = await db.query(
-    "SELECT id, role, content, created_at FROM chatbot_messages WHERE conversation_id = ? ORDER BY id",
+    "SELECT id, role, content, sources, created_at FROM chatbot_messages WHERE conversation_id = ? ORDER BY id",
     [conversation.id]
   );
-  send(req, res, { data: { conversation, messages: rows } });
+  const list = rows.map((m) => ({ ...m, sources: parseSources(m.sources) }));
+  send(req, res, { data: { conversation, messages: list } });
 }
 
 async function remove(req, res) {
@@ -80,9 +92,11 @@ async function sendMessage(req, res) {
     history = rows.reverse();
   }
 
+  const { knowledge, live } = await gatherContext(req.user, message, history);
+
   let reply;
   try {
-    reply = await ai.generateReply([...history, { role: "user", content: message }], language);
+    reply = await ai.generateReply([...history, { role: "user", content: message }], language, { knowledge, live: live.text });
   } catch (error) {
     if (!(error instanceof ai.AiError)) throw error;
     console.error(`AI ${error.kind}: ${error.message}`);
@@ -104,9 +118,10 @@ async function sendMessage(req, res) {
     conversation.id,
     message
   ]);
+  const sources = citedSources(reply.text, knowledge, live.used);
   const [saved] = await db.query(
-    "INSERT INTO chatbot_messages (conversation_id, role, content, provider, model) VALUES (?, 'assistant', ?, ?, ?)",
-    [conversation.id, reply.text, reply.provider, reply.model]
+    "INSERT INTO chatbot_messages (conversation_id, role, content, provider, model, sources) VALUES (?, 'assistant', ?, ?, ?, ?)",
+    [conversation.id, reply.text, reply.provider, reply.model, sources.length ? JSON.stringify(sources) : null]
   );
   await db.query("UPDATE chatbot_conversations SET updated_at = NOW() WHERE id = ?", [conversation.id]);
 
@@ -114,9 +129,50 @@ async function sendMessage(req, res) {
     data: {
       conversation_id: conversation.id,
       title: conversation.title,
-      reply: { id: saved.insertId, role: "assistant", content: reply.text, created_at: new Date().toISOString() }
+      reply: { id: saved.insertId, role: "assistant", content: reply.text, sources, created_at: new Date().toISOString() }
     }
   });
+}
+
+/**
+ * Knowledge-base passages (RAG) and live database facts for this question.
+ * Never fails the chat: if search or a lookup breaks, the AI answers without it.
+ */
+async function gatherContext(user, message, history) {
+  // A follow-up like "আর নগদে?" means little alone, so search with the previous question too.
+  const lastQuestion = [...history].reverse().find((m) => m.role === "user");
+  const query = lastQuestion && message.length < 60 ? `${lastQuestion.content}\n${message}` : message;
+
+  const [knowledge, live] = await Promise.all([
+    kb.search(query, { limit: 5 }).catch((error) => {
+      console.error("[chat knowledge]", error.message);
+      return [];
+    }),
+    liveContext(user, message).catch((error) => {
+      console.error("[chat live]", error.message);
+      return { text: "", used: [] };
+    })
+  ]);
+  return { knowledge, live };
+}
+
+const LIVE_LABELS = {
+  market_prices: ["কৃষি রথ বাজারদর", "Krishi Roth market prices"],
+  weather: ["আবহাওয়া (Open-Meteo)", "Weather (Open-Meteo)"],
+  wallet: ["আপনার ওয়ালেট", "Your wallet"],
+  trades: ["আপনার লেনদেন", "Your trades"]
+};
+
+/** The knowledge passages the answer actually cites ([1], [2] ...) plus the live data used. */
+function citedSources(text, knowledge, liveUsed) {
+  const cited = new Set([...text.matchAll(/\[(\d{1,2})\]/g)].map((m) => Number(m[1])));
+  const docs = [];
+  for (const n of [...cited].sort((a, b) => a - b)) {
+    const k = knowledge[n - 1];
+    if (k) docs.push({ n, type: "document", document_id: k.documentId, title: k.title, source: k.source || null });
+  }
+  const live = liveUsed.map((key) => ({ type: "live", key, title_bn: LIVE_LABELS[key][0], title_en: LIVE_LABELS[key][1] }));
+  return [...docs, ...live];
 }
 
 module.exports = { schemas, status, conversations, messages, remove, sendMessage };

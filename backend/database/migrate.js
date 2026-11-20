@@ -14,7 +14,7 @@ const db = require("../config/db");
 const { config } = require("../config/env");
 
 /** New tables, in dependency order. Their definitions are read from schema.sql. */
-const TABLES = ["auth_codes", "trusted_devices", "wallets", "wallet_deposits", "wallet_withdrawals", "wallet_transactions", "wallet_sms", "weather_alerts"];
+const TABLES = ["auth_codes", "trusted_devices", "wallets", "wallet_deposits", "wallet_withdrawals", "wallet_transactions", "wallet_sms", "weather_alerts", "kb_documents", "kb_chunks"];
 
 /** Every purpose auth_codes must accept (checked against the live ENUM). */
 const AUTH_CODE_PURPOSES = ["password_reset", "login_link", "login_2fa", "enable_2fa", "disable_2fa", "withdraw", "password_change"];
@@ -31,7 +31,9 @@ const COLUMNS = [
   ["trade_records", "escrow_amount", "DECIMAL(14,2) NULL"],
   ["trade_records", "escrow_held_at", "DATETIME NULL"],
   ["trade_records", "escrow_settled_at", "DATETIME NULL"],
-  ["trade_records", "auto_release_at", "DATETIME NULL"]
+  ["trade_records", "auto_release_at", "DATETIME NULL"],
+  // v1.6: chatbot answers remember which knowledge-base documents they used
+  ["chatbot_messages", "sources", "TEXT NULL"]
 ];
 
 function createStatement(schema, table) {

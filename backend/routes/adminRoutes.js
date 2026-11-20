@@ -7,6 +7,7 @@ const c = require("../controllers/adminController");
 const verifications = require("../controllers/verificationController");
 const wallet = require("../controllers/walletController");
 const tools = require("../controllers/adminToolsController");
+const knowledge = require("../controllers/knowledgeController");
 const { authenticate, authorize } = require("../middleware/auth");
 const { validateBody, validateQuery, validateId } = require("../middleware/validate");
 
@@ -16,6 +17,13 @@ const id = validateId();
 router.use(authenticate, authorize("admin"));
 
 router.get("/stats", c.stats);
+
+// Chatbot knowledge base (RAG)
+router.get("/knowledge", knowledge.list);
+router.post("/knowledge", knowledge.receiveFile, validateBody(knowledge.schemas.add), knowledge.add);
+router.post("/knowledge/search", validateBody(knowledge.schemas.search), knowledge.search);
+router.get("/knowledge/:id", id, knowledge.chunks);
+router.delete("/knowledge/:id", id, knowledge.remove);
 router.post("/test-email", validateBody(tools.schemas.testEmail), tools.testEmail);
 router.get("/reports", c.reports);
 router.get("/activity", validateQuery(c.schemas.activity), c.activity);

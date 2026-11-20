@@ -957,10 +957,38 @@ CREATE TABLE IF NOT EXISTS chatbot_messages (
   content          MEDIUMTEXT   NOT NULL,
   provider         VARCHAR(40)  NULL,
   model            VARCHAR(80)  NULL,
+  sources          TEXT         NULL,
   created_at       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY idx_chatbot_messages_conversation (conversation_id, created_at),
   CONSTRAINT fk_chatbot_messages_conversation FOREIGN KEY (conversation_id) REFERENCES chatbot_conversations (id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Knowledge base for the chatbot (RAG): documents an admin uploads, split
+-- into chunks with an embedding vector each (Float32 array stored as a BLOB).
+CREATE TABLE IF NOT EXISTS kb_documents (
+  id           INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  title        VARCHAR(200)  NOT NULL,
+  source       VARCHAR(300)  NULL,
+  file_name    VARCHAR(200)  NULL,
+  char_count   INT UNSIGNED  NOT NULL DEFAULT 0,
+  chunk_count  INT UNSIGNED  NOT NULL DEFAULT 0,
+  is_builtin   TINYINT(1)    NOT NULL DEFAULT 0,
+  created_by   INT UNSIGNED  NULL,
+  created_at   DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_kb_documents_user FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS kb_chunks (
+  id           INT UNSIGNED  NOT NULL AUTO_INCREMENT,
+  document_id  INT UNSIGNED  NOT NULL,
+  chunk_index  INT UNSIGNED  NOT NULL,
+  content      TEXT          NOT NULL,
+  embedding    BLOB          NOT NULL,
+  PRIMARY KEY (id),
+  KEY idx_kb_chunks_document (document_id, chunk_index),
+  CONSTRAINT fk_kb_chunks_document FOREIGN KEY (document_id) REFERENCES kb_documents (id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------

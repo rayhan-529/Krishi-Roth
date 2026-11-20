@@ -35,9 +35,16 @@ function settings() {
   };
 }
 
-function systemPrompt(language) {
+/**
+ * @param {"bn"|"en"} language
+ * @param {{ knowledge?: Array<{ title: string, content: string }>, live?: string }} [context]
+ *   knowledge: matching chunks from the knowledge base (RAG); live: facts from our database
+ */
+function systemPrompt(language, context = {}) {
+  const knowledge = context.knowledge || [];
   return [
-    "You are 'Krishi Roth Sahayak' (কৃষি রথ সহায়ক), an agricultural assistant for farmers in Bangladesh, inside the Krishi Roth platform.",
+    "You are 'Roth Sahayak' (রথ সহায়ক), the assistant of Krishi Roth (কৃষি রথ, krishiroth.com), a platform for farmers in Bangladesh.",
+    "You help with two things: (1) farming questions and (2) how to use the Krishi Roth website (selling, buying, wallet, Safe Trade, weather, crop doctor, bookings, account).",
     language === "en"
       ? "Reply in simple English unless the farmer writes in Bengali."
       : "Reply in simple, everyday Bengali (বাংলা) unless the farmer writes in English. Use words a rural farmer understands.",
@@ -46,10 +53,18 @@ function systemPrompt(language) {
     "Always write numbers with English digits 0-9 (for example '20 কেজি', '৳ 1,500'), never Bengali digits, even in a Bengali reply.",
     "Fertilizer and pesticide advice must be general: tell the farmer to follow the product label and to confirm doses with the Upazila Agriculture Officer (উপজেলা কৃষি কর্মকর্তা) or the government agriculture call centre (16123).",
     "If a disease is described without enough detail, list the likely causes and say what to check; do not claim certainty.",
-    "Do not invent market prices. Tell the farmer to check the Krishi Roth market price page or the local market.",
-    "If the question is not about agriculture or farm business, politely say you can only help with farming topics.",
-    "Never give dangerous instructions (for example mixing chemicals or using banned pesticides)."
-  ].join("\n");
+    "Never invent market prices, balances, trade details or weather. Use only the LIVE DATA below; if what was asked is not there, say so and point to the right page (বাজারদর, ওয়ালেট, লেনদেন, আবহাওয়া).",
+    "For questions about the website, answer only from the KNOWLEDGE BASE below. If it does not cover the question, say you are not sure and suggest the অভিযোগ (complaints) page or krishiroth@gmail.com. Never make up site features.",
+    "When you give a market price, always say the date it is from (it may not be today) and the market name.",
+    "Explain trade and payment statuses in plain words (for example 'টাকা এখনো দেওয়া হয়নি'), never show codes like payment_pending.",
+    "When you use a KNOWLEDGE BASE passage, cite it at the end of the sentence like [1] or [2]. Do not cite LIVE DATA with numbers.",
+    "If the question is not about farming or Krishi Roth, politely say you can only help with farming and this website.",
+    "Never give dangerous instructions (for example mixing chemicals or using banned pesticides). Never ask for passwords, codes or bKash/Nagad PINs.",
+    knowledge.length
+      ? `\nKNOWLEDGE BASE (passages found for this question):\n${knowledge.map((k, i) => `[${i + 1}] (${k.title})\n${k.content}`).join("\n\n")}`
+      : "\nKNOWLEDGE BASE: nothing relevant was found for this question.",
+    context.live ? `\nLIVE DATA (from the Krishi Roth database right now):\n${context.live}` : ""
+  ].filter(Boolean).join("\n");
 }
 
 class AiError extends Error {
@@ -148,11 +163,11 @@ async function callAnthropic(s, system, history) {
  * @param {"bn"|"en"} language
  * @returns {Promise<{ text: string, provider: string, model: string }>}
  */
-async function generateReply(history, language) {
+async function generateReply(history, language, context = {}) {
   const s = settings();
   if (!s.configured) throw new AiError("not_configured");
 
-  const system = systemPrompt(language);
+  const system = systemPrompt(language, context);
   const call = { gemini: callGemini, openai: callOpenAI, anthropic: callAnthropic }[s.provider];
   return withFallback(s, async (model) => ({ text: latinDigits(await call({ ...s, model }, system, history)), provider: s.provider, model }));
 }
