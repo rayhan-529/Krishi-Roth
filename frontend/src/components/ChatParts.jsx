@@ -89,7 +89,9 @@ export function ChatMessage({ message: m }) {
         <div className="bubble-sources">
           <span>{tr('তথ্যসূত্র:', 'Sources:')}</span>
           {docs.map((s) => (
-            <span key={`d${s.n}`} className="source-chip" title={s.source || ''}><sup className="cite">{s.n}</sup> {s.title}</span>
+            <span key={`d${s.n}`} className="source-chip" title={s.source || ''}>
+              {(s.ns || [s.n]).map((n) => <sup key={n} className="cite">{n}</sup>)} {s.title}
+            </span>
           ))}
           {live.map((s) => (
             <span key={s.key} className="source-chip live"><Icon name="refresh" size={11} /> {tr(s.title_bn, s.title_en)}</span>

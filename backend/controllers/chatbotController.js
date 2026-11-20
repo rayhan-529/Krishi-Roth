@@ -166,11 +166,15 @@ const LIVE_LABELS = {
 /** The knowledge passages the answer actually cites ([1], [2] ...) plus the live data used. */
 function citedSources(text, knowledge, liveUsed) {
   const cited = new Set([...text.matchAll(/\[(\d{1,2})\]/g)].map((m) => Number(m[1])));
-  const docs = [];
+  // One entry per document, listing every passage number cited from it ([1] [2] from the same guide -> "1, 2").
+  const byDoc = new Map();
   for (const n of [...cited].sort((a, b) => a - b)) {
     const k = knowledge[n - 1];
-    if (k) docs.push({ n, type: "document", document_id: k.documentId, title: k.title, source: k.source || null });
+    if (!k) continue;
+    if (!byDoc.has(k.documentId)) byDoc.set(k.documentId, { n, ns: [], type: "document", document_id: k.documentId, title: k.title, source: k.source || null });
+    byDoc.get(k.documentId).ns.push(n);
   }
+  const docs = [...byDoc.values()];
   const live = liveUsed.map((key) => ({ type: "live", key, title_bn: LIVE_LABELS[key][0], title_en: LIVE_LABELS[key][1] }));
   return [...docs, ...live];
 }

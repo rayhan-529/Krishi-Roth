@@ -22,7 +22,6 @@ const PUBLIC = [
   ['/services/harvester', 'হারভেস্টার', 'Harvester'],
   ['/services/tractor', 'ট্রাক্টর', 'Tractor'],
   ['/services/transport', 'পরিবহন', 'Transport'],
-  ['/chatbot', 'এআই সহায়ক', 'AI Assistant'],
   ['/crop-doctor', 'ফসলের ডাক্তার', 'Crop Doctor'],
 ]
 
@@ -50,14 +49,12 @@ export const MENUS = {
     ['/market-prices', 'বাজারদর', 'Market Prices'],
     ['/services/transport', 'পরিবহন', 'Transport'],
     ['/bookings', 'বুকিং', 'Bookings'],
-    ['/chatbot', 'এআই সহায়ক', 'AI Assistant'],
   ],
   provider: [
     ['/provider', 'ড্যাশবোর্ড', 'Dashboard'],
     ['/provider/services', 'আমার সেবা', 'My Services'],
     ['/bookings', 'বুকিং অনুরোধ', 'Bookings'],
     ['/market-prices', 'বাজারদর', 'Market Prices'],
-    ['/chatbot', 'এআই সহায়ক', 'AI Assistant'],
   ],
   admin: [
     ['/admin', 'ড্যাশবোর্ড', 'Dashboard'],
@@ -106,7 +103,6 @@ export const NAV_ICON = {
   '/services/harvester': 'wheat',
   '/services/tractor': 'tractor',
   '/services/transport': 'truck',
-  '/chatbot': 'sparkle',
   '/crop-doctor': 'leaf',
   '/about': 'info',
   '/provider/services': 'wrench',
@@ -124,4 +120,4 @@ export const NAV_ICON = {
 }
 
 /** Short top-bar links for visitors; the rest stay in the drawer. */
-export const GUEST_TOP = ['/market-prices', '/marketplace', '/services/labour', '/services/transport', '/chatbot']
+export const GUEST_TOP = ['/market-prices', '/marketplace', '/services/labour', '/services/transport']

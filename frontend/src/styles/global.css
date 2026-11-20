@@ -2495,3 +2495,12 @@ a.stat-card:hover { transform: translateY(-2px); border-top-color: var(--tone); 
 .kb-docs li { display: flex; align-items: center; gap: 0.7rem; padding: 0.6rem; border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .kb-doc-main { flex: 1; display: grid; min-width: 0; }
 .kb-doc-main small { color: var(--muted); }
+.chat-widget-note { margin: 0; padding: 0 0.6rem 0.45rem; font-size: 0.68rem; color: var(--muted); background: var(--surface, #fff); text-align: center; }
+.chat-guest-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+.chat-widget-history ul { list-style: none; padding: 0; margin: 0.5rem 0 0; display: grid; gap: 0.35rem; }
+.chat-widget-history li { display: flex; align-items: center; gap: 0.25rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface, #fff); }
+.chat-widget-history li.active { border-color: var(--green); }
+.chat-widget-history li > button:first-child { flex: 1; min-width: 0; display: grid; text-align: left; padding: 0.5rem 0.6rem; border: 0; background: none; cursor: pointer; }
+.chat-widget-history li span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.88rem; }
+.chat-widget-history li small { color: var(--muted); font-size: 0.72rem; }
+.chat-history-back { display: inline-flex; align-items: center; gap: 0.25rem; border: 0; background: none; color: var(--green-dark); font-weight: 600; cursor: pointer; padding: 0; }
