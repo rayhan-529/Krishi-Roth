@@ -2,6 +2,7 @@
  * Small reusable building blocks used by every page.
  */
 import { useEffect, useId, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
 import { useLang } from '../context/LanguageContext'
 import { mediaUrl } from '../services/api'
@@ -218,7 +219,7 @@ export function Modal({ open, title, onClose, children, footer, wide }) {
   }, [open, onClose])
 
   if (!open) return null
-  return (
+  return createPortal(
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose && onClose()}>
       <div className={`modal ${wide ? 'modal-wide' : ''}`} role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <div className="modal-head">
@@ -232,7 +233,9 @@ export function Modal({ open, title, onClose, children, footer, wide }) {
         <div className="modal-body">{children}</div>
         {footer && <div className="modal-foot">{footer}</div>}
       </div>
-    </div>
+    </div>,
+    // Rendered at the end of <body> so no card, banner or sidebar can ever cover it.
+    document.body,
   )
 }
 
