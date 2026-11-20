@@ -71,6 +71,8 @@ function startScheduler() {
       const sent = await sendHarvestReminders();
       if (sent > 0) console.log(`Harvest reminders sent: ${sent}`);
       await deleteOldSessions();
+      const alerts = await require("./weatherAlertService").sendWeatherAlerts();
+      if (alerts > 0) console.log(`Weather alerts sent: ${alerts}`);
       // Required lazily: escrowService -> tradeService -> notificationService, loaded after start-up.
       const released = await require("./escrowService").releaseDueEscrows();
       if (released > 0) console.log(`Safe Trade escrows auto-released: ${released}`);

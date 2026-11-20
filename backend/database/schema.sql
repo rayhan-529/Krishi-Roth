@@ -784,6 +784,20 @@ CREATE TABLE IF NOT EXISTS wallet_sms (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ---------------------------------------------------------------------
+-- 14c. Weather alerts already sent (one per district, date and kind)
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS weather_alerts (
+  id           INT UNSIGNED      NOT NULL AUTO_INCREMENT,
+  district_id  SMALLINT UNSIGNED NOT NULL,
+  alert_date   DATE              NOT NULL,
+  kind         VARCHAR(20)       NOT NULL,
+  created_at   DATETIME          NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_weather_alerts (district_id, alert_date, kind),
+  CONSTRAINT fk_weather_alerts_district FOREIGN KEY (district_id) REFERENCES districts (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ---------------------------------------------------------------------
 -- 16. Buyer <-> farmer messaging (contact the seller)
 -- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS conversations (

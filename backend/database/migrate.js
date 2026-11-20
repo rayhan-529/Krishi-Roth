@@ -14,7 +14,7 @@ const db = require("../config/db");
 const { config } = require("../config/env");
 
 /** New tables, in dependency order. Their definitions are read from schema.sql. */
-const TABLES = ["auth_codes", "trusted_devices", "wallets", "wallet_deposits", "wallet_withdrawals", "wallet_transactions", "wallet_sms"];
+const TABLES = ["auth_codes", "trusted_devices", "wallets", "wallet_deposits", "wallet_withdrawals", "wallet_transactions", "wallet_sms", "weather_alerts"];
 
 /** Every purpose auth_codes must accept (checked against the live ENUM). */
 const AUTH_CODE_PURPOSES = ["password_reset", "login_link", "login_2fa", "enable_2fa", "disable_2fa", "withdraw", "password_change"];
