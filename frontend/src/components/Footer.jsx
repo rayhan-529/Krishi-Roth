@@ -68,7 +68,7 @@ function SocialIcon({ name }) {
 
 export default function Footer() {
   const { tr } = useLang()
-  const socials = Object.entries(SOCIAL).filter(([, url]) => url)
+  const socials = Object.entries(SOCIAL)
 
   return (
     <footer className="footer site-footer">
@@ -84,13 +84,16 @@ export default function Footer() {
             <li><Icon name="phone" size={16} /> {tr('কৃষি কল সেন্টার', 'Agriculture call centre')}: <a href="tel:16123">16123</a></li>
             <li><Icon name="pin" size={16} /> {tr('বাংলাদেশ', 'Bangladesh')}</li>
           </ul>
-          {socials.length > 0 && (
-            <div className="footer-social">
-              {socials.map(([name, url]) => (
+          {/* Icons always show; an icon becomes a link once its URL is filled in SOCIAL above. */}
+          <div className="footer-social">
+            {socials.map(([name, url]) =>
+              url ? (
                 <a key={name} href={url} target="_blank" rel="noreferrer" aria-label={name}><SocialIcon name={name} /></a>
-              ))}
-            </div>
-          )}
+              ) : (
+                <span key={name} aria-label={name} title={name}><SocialIcon name={name} /></span>
+              ),
+            )}
+          </div>
         </div>
 
         {COLUMNS.map((col) => (

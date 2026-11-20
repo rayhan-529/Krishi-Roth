@@ -2346,3 +2346,4 @@ a.stat-card:hover { transform: translateY(-2px); border-top-color: var(--tone); 
 .to-top .icon { transform: rotate(-90deg); }
 .to-top:hover { background: #fbbf24; }
 @media print { .site-footer { display: none; } }
+.footer-social span { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.25); color: rgba(255, 255, 255, 0.78); }
