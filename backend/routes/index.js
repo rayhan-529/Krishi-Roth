@@ -10,6 +10,7 @@ router.use("/auth", require("./authRoutes"));
 router.use("/", require("./profileRoutes")); // /profile and /users/:id
 router.use("/verifications", require("./verificationRoutes"));
 router.use("/market-prices", require("./marketPriceRoutes"));
+router.use("/weather", require("./weatherRoutes"));
 router.use("/listings", require("./listingRoutes"));
 router.use("/offers", require("./offerRoutes"));
 router.use("/trades", require("./tradeRoutes"));
