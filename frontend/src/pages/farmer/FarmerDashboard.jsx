@@ -9,6 +9,7 @@ import BarChart, { HBarList } from '../../components/BarChart'
 import { Glyph } from '../../components/Icon'
 import WeatherCard from '../../components/WeatherCard'
 import { Card, EmptyState, ErrorBox, Loader, PageHeader, PriceSourceNote, StatCard, StatusBadge } from '../../components/ui'
+import { PaymentMethods } from '../../components/CardSoon'
 
 export function RecentNotifications({ items }) {
   const { lang, tr } = useLang()
@@ -135,6 +136,7 @@ export default function FarmerDashboard() {
           <RecentNotifications items={d.recent_notifications} />
         </div>
       </div>
+      <PaymentMethods />
     </div>
   )
 }

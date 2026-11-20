@@ -6,6 +6,7 @@
  *   <PayLogos />                   every method, for the footer
  *   <CardSoon />                   upcoming methods, for top-up / payment boxes
  */
+import { Link } from 'react-router-dom'
 import { useLang } from '../context/LanguageContext'
 
 /** live: usable today. Everything else shows as "coming soon". */
@@ -37,6 +38,28 @@ export function PayLogos() {
     <div className="pay-logos">
       {PAY_METHODS.map((m) => <PayLogo key={m.key} method={m.key} />)}
     </div>
+  )
+}
+
+/** Dashboard strip: methods in use now, then the upcoming ones greyed out. */
+export function PaymentMethods() {
+  const { tr } = useLang()
+  return (
+    <section className="card pay-strip">
+      <div className="pay-strip-group">
+        <h3>{tr('পেমেন্ট মাধ্যম', 'Payment methods')}</h3>
+        <div className="pay-logos">
+          {PAY_METHODS.filter((m) => m.live).map((m) => <PayLogo key={m.key} method={m.key} />)}
+        </div>
+      </div>
+      <div className="pay-strip-group pay-upcoming-inline">
+        <h3>{tr('শীঘ্রই আসছে', 'Coming soon')}</h3>
+        <div className="pay-logos">
+          {PAY_METHODS.filter((m) => !m.live).map((m) => <PayLogo key={m.key} method={m.key} />)}
+        </div>
+      </div>
+      <Link to="/wallet" className="btn btn-primary btn-sm">{tr('ব্যালেন্স যোগ করুন', 'Add balance')}</Link>
+    </section>
   )
 }
 

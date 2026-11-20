@@ -9,6 +9,7 @@ import BarChart from '../../components/BarChart'
 import { Card, ErrorBox, Loader, PageHeader, StatCard, StatusBadge } from '../../components/ui'
 import { QuickLinks, RecentNotifications } from '../farmer/FarmerDashboard'
 import { ListingCard } from '../market/Marketplace'
+import { PaymentMethods } from '../../components/CardSoon'
 
 export default function BuyerDashboard() {
   const { user } = useAuth()
@@ -64,6 +65,7 @@ export default function BuyerDashboard() {
           <RecentNotifications items={d.recent_notifications} />
         </div>
       </div>
+      <PaymentMethods />
     </div>
   )
 }

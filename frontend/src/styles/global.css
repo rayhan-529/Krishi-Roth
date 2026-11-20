@@ -2387,3 +2387,9 @@ a.stat-card:hover { transform: translateY(-2px); border-top-color: var(--tone); 
   font-weight: 700;
   white-space: nowrap;
 }
+
+/* dashboard payment strip */
+.pay-strip { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem 2rem; margin-top: 1.25rem; }
+.pay-strip h3 { margin: 0 0 0.5rem; font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+.pay-upcoming-inline h3 { color: #92400e; }
+.pay-upcoming-inline .pay-logo { filter: grayscale(0.55); opacity: 0.7; }

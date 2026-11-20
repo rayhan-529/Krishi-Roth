@@ -9,6 +9,7 @@ import { date, money, monthLabel, num, pick } from '../../utils/format'
 import BarChart from '../../components/BarChart'
 import { Alert, Card, ErrorBox, Loader, PageHeader, StatCard, Stars, StatusBadge } from '../../components/ui'
 import { RecentNotifications } from '../farmer/FarmerDashboard'
+import { PaymentMethods } from '../../components/CardSoon'
 
 export default function ProviderDashboard() {
   const { user } = useAuth()
@@ -71,6 +72,7 @@ export default function ProviderDashboard() {
           <RecentNotifications items={d.recent_notifications} />
         </div>
       </div>
+      <PaymentMethods />
     </div>
   )
 }
