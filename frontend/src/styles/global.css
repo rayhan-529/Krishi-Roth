@@ -2361,7 +2361,8 @@ a.stat-card:hover { transform: translateY(-2px); border-top-color: var(--tone); 
   display: inline-grid;
   place-items: center;
 }
-.pay-logo svg { width: 100%; height: 100%; display: block; }
+.pay-logo img { width: auto; height: auto; max-width: 50px; max-height: 30px; object-fit: contain; display: block; }
+.pay-logo-mastercard img, .pay-logo-amex img { max-height: 26px; }
 
 .method-picker button { display: grid; justify-items: center; gap: 0.35rem; }
 .method-picker button .pay-logo { box-shadow: none; }
