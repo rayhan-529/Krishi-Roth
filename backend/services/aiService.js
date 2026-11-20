@@ -5,18 +5,20 @@
  *   AI_PROVIDER = gemini (default) | openai | anthropic
  *   AI_API_KEY  = the provider's secret key (never sent to the browser)
  *   AI_MODEL    = optional model override
+ *   AI_FALLBACK_MODEL = optional backup models (comma separated), tried in order when the main one is slow or down
  *
  * When AI_API_KEY is empty the chatbot reports "not configured" instead of
  * pretending to work. Calls use the providers' REST APIs with fetch, so no
  * extra npm packages are needed.
  */
 const PROVIDERS = {
-  gemini: { label: "Google Gemini", defaultModel: "gemini-3.5-flash" },
+  gemini: { label: "Google Gemini", defaultModel: "gemini-3.5-flash-lite", fallbackModel: "gemini-3.1-flash-lite,gemini-3-flash-preview" },
   openai: { label: "OpenAI", defaultModel: "gpt-4.1-mini" },
   anthropic: { label: "Anthropic Claude", defaultModel: "claude-haiku-4-5" }
 };
 
-const TIMEOUT_MS = 45 * 1000;
+// Per attempt. A farmer should not wait longer than this for one model; the backup model gets its own try.
+const TIMEOUT_MS = 20 * 1000; // 3 models x 20s stays under the website's 75s limit
 const MAX_OUTPUT_TOKENS = 1200;
 
 function settings() {
@@ -27,6 +29,7 @@ function settings() {
     provider: known ? provider : "gemini",
     label: (known || PROVIDERS.gemini).label,
     model: (process.env.AI_MODEL || "").trim() || (known || PROVIDERS.gemini).defaultModel,
+    fallbackModel: (process.env.AI_FALLBACK_MODEL || "").trim() || (known || PROVIDERS.gemini).fallbackModel || "",
     apiKey,
     configured: Boolean(apiKey) && Boolean(known)
   };
@@ -66,12 +69,13 @@ async function post(url, headers, body) {
       signal: AbortSignal.timeout(TIMEOUT_MS)
     });
   } catch (error) {
-    throw new AiError("failed", `Network error: ${error.message}`);
+    throw new AiError(error.name === "TimeoutError" ? "busy" : "failed", `Network error: ${error.message}`);
   }
 
   const json = await response.json().catch(() => ({}));
   if (response.status === 429) throw new AiError("rate_limited", "Provider rate limit reached");
   if (response.status === 401 || response.status === 403) throw new AiError("auth", "Provider rejected the API key");
+  if (response.status === 503 || response.status === 529) throw new AiError("busy", (json.error && json.error.message) || "Provider overloaded");
   if (!response.ok) {
     const detail = (json.error && (json.error.message || json.error.type)) || `HTTP ${response.status}`;
     throw new AiError("failed", detail);
@@ -150,8 +154,33 @@ async function generateReply(history, language) {
 
   const system = systemPrompt(language);
   const call = { gemini: callGemini, openai: callOpenAI, anthropic: callAnthropic }[s.provider];
-  const text = await call(s, system, history);
-  return { text, provider: s.provider, model: s.model };
+  return withFallback(s, async (model) => ({ text: latinDigits(await call({ ...s, model }, system, history)), provider: s.provider, model }));
+}
+
+/** The site shows English digits everywhere; small models sometimes still write ১২৩. */
+function latinDigits(text) {
+  return String(text).replace(/[০-৯]/g, (d) => String(d.charCodeAt(0) - 0x09e6));
+}
+
+/**
+ * Runs fn with the main model; if that model times out, is overloaded or no longer
+ * exists, tries the backup model once. Key, quota and safety errors are not retried.
+ */
+async function withFallback(s, fn) {
+  const models = [s.model, ...s.fallbackModel.split(",").map((m) => m.trim())].filter((m, i, all) => m && all.indexOf(m) === i);
+  let lastError;
+  for (const model of models) {
+    try {
+      return await fn(model);
+    } catch (error) {
+      const retryable = error instanceof AiError && (error.kind === "failed" || error.kind === "busy");
+      if (!retryable) throw error;
+      console.warn(`AI model ${model} failed (${error.message})`);
+      lastError = error;
+    }
+  }
+  // Every model was down or overloaded: tell the farmer to try again shortly.
+  throw lastError.kind === "busy" ? new AiError("rate_limited", lastError.message) : lastError;
 }
 
 // ------------------------------------------------------------ crop doctor (image)
@@ -278,8 +307,8 @@ async function diagnoseCropImage(photo, hints, language) {
   if (!s.configured) throw new AiError("not_configured");
   const image = { mimeType: photo.mimeType, base64: photo.buffer.toString("base64") };
   const call = { gemini: visionGemini, openai: visionOpenAI, anthropic: visionAnthropic }[s.provider];
-  const text = await call(s, diagnosisPrompt(language, hints), image);
-  return { ...parseDiagnosis(text), provider: s.provider, model: s.model };
+  const prompt = diagnosisPrompt(language, hints);
+  return withFallback(s, async (model) => ({ ...parseDiagnosis(latinDigits(await call({ ...s, model }, prompt, image))), provider: s.provider, model }));
 }
 
 function status() {

@@ -24,7 +24,7 @@ services:
       - key: AI_PROVIDER
         value: gemini
       - key: AI_MODEL
-        value: gemini-3.5-flash
+        value: gemini-3.5-flash-lite
       - key: UPLOAD_MAX_MB
         value: "3"
       - key: CLIENT_URL
