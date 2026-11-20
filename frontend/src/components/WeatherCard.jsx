@@ -54,8 +54,18 @@ export default function WeatherCard({ districtId, compact = false }) {
   }
 
   return (
-    <Card title={title} actions={compact ? <Link to="/weather">{tr('৭ দিনের পূর্বাভাস', '7-day forecast')}</Link> : null}>
+    <Card title={title} actions={compact ? <Link to="/weather">{tr('7 দিনের পূর্বাভাস', '7-day forecast')}</Link> : null}>
       <WeatherToday data={data} lang={lang} tr={tr} />
+      {data.advice && data.advice.length > 0 && (
+        <ul className="weather-advice">
+          {data.advice.map((a) => (
+            <li key={a.kind} className={`advice-${a.tone}`}>
+              <Icon name={a.tone === 'warn' ? 'alert' : a.tone === 'good' ? 'checkCircle' : 'info'} size={16} />
+              <span>{lang === 'en' ? a.en : a.bn}</span>
+            </li>
+          ))}
+        </ul>
+      )}
       {!compact && (
         <ul className="weather-week">
           {data.daily.map((d, i) => (

@@ -7,6 +7,7 @@ const v = require("../utils/validator");
 const ApiError = require("../utils/ApiError");
 const { send } = require("../utils/response");
 const weather = require("../services/weatherService");
+const { adviceFor } = require("../services/weatherAdvice");
 
 const DEFAULT_DISTRICT = 18; // Dhaka
 
@@ -27,7 +28,7 @@ async function forecast(req, res) {
     throw ApiError.unavailable("এখন আবহাওয়ার তথ্য পাওয়া যাচ্ছে না। একটু পরে চেষ্টা করুন।", "Weather data is not available right now. Please try again shortly.");
   }
 
-  send(req, res, { data: { district, ...data, source: "Open-Meteo" } });
+  send(req, res, { data: { district, ...data, advice: adviceFor(data), source: "Open-Meteo" } });
 }
 
 module.exports = { schemas, forecast };
