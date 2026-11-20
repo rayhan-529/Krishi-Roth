@@ -59,6 +59,19 @@ const PATHS = {
   refresh: (<><path d="M20 11a8 8 0 0 0-14.9-3M4 4v4h4" /><path d="M4 13a8 8 0 0 0 14.9 3M20 20v-4h-4" /></>),
   filter: <path d="M4 5h16l-6 7v6l-4 2v-8z" />,
   info: (<><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7.5v.5" /></>),
+  // weather
+  sun: (<><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></>),
+  partly: (<><path d="M8 3v1.5M3.5 8H2M4.2 4.2l1 1M12.5 4.8l-1 1" /><path d="M5.5 10.5A3.5 3.5 0 0 1 11.6 7" /><path d="M8 19h9a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.6A3.2 3.2 0 0 0 8 19z" /></>),
+  cloud: <path d="M7 19h10a4.5 4.5 0 0 0 .6-9A6 6 0 0 0 6 11.2 4 4 0 0 0 7 19z" />,
+  fog: (<><path d="M7 14h10a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 7 7.5 3.5 3.5 0 0 0 7 14z" /><path d="M4 18h16M7 21h10" /></>),
+  drizzle: (<><path d="M7 14h10a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 7 7.5 3.5 3.5 0 0 0 7 14z" /><path d="M9 17v1M13 18v1M16 17v1" /></>),
+  rain: (<><path d="M7 14h10a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 7 7.5 3.5 3.5 0 0 0 7 14z" /><path d="M9 17l-1 3M13 17l-1 3M17 17l-1 3" /></>),
+  'heavy-rain': (<><path d="M7 13h10a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 7 6.5 3.5 3.5 0 0 0 7 13z" /><path d="M8 16l-1.5 4M12 16l-1.5 4M16 16l-1.5 4M10 15.5l-.5 1.5M14 15.5l-.5 1.5" /></>),
+  storm: (<><path d="M7 13h10a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 7 6.5 3.5 3.5 0 0 0 7 13z" /><path d="M12.5 14l-2.5 4h3l-2 4" /></>),
+  snow: (<><path d="M7 13h10a4 4 0 0 0 .5-8A5.5 5.5 0 0 0 7 6.5 3.5 3.5 0 0 0 7 13z" /><path d="M9 17h.01M13 17h.01M11 20h.01M15 20h.01" /></>),
+  droplet: <path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z" />,
+  wind: <path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h7" />,
+  thermometer: (<><path d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0z" /><path d="M12 9v7" /></>),
 }
 
 /** Old emoji markers mapped to line icons, so every page renders consistently. */

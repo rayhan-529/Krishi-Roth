@@ -14,6 +14,7 @@ import { HOME_BY_ROLE, PROVIDER_ROLES } from './utils/nav'
 // Public
 const Home = lazy(() => import('./pages/public/Home'))
 const About = lazy(() => import('./pages/public/About'))
+const Weather = lazy(() => import('./pages/public/Weather'))
 const Privacy = lazy(() => import('./pages/public/Legal').then((m) => ({ default: m.Privacy })))
 const Terms = lazy(() => import('./pages/public/Legal').then((m) => ({ default: m.Terms })))
 const NotFound = lazy(() => import('./pages/public/NotFound'))
@@ -90,6 +91,7 @@ export default function App() {
             <>
               <Route index element={<Home />} />
               <Route path="about" element={<About />} />
+              <Route path="weather" element={<Weather />} />
               <Route path="privacy" element={<Privacy />} />
               <Route path="terms" element={<Terms />} />
               <Route path="login" element={<Login />} />

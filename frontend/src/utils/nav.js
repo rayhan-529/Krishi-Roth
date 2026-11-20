@@ -16,6 +16,7 @@ export const PROVIDER_ROLES = ['labour', 'harvester_owner', 'tractor_owner', 'tr
 
 const PUBLIC = [
   ['/market-prices', 'বাজারদর', 'Market Prices'],
+  ['/weather', 'আবহাওয়া', 'Weather'],
   ['/marketplace', 'ফসলের বাজার', 'Marketplace'],
   ['/services/labour', 'শ্রমিক', 'Labour'],
   ['/services/harvester', 'হারভেস্টার', 'Harvester'],
@@ -97,6 +98,7 @@ export const NAV_ICON = {
   '/bookings': 'calendar',
   '/messages': 'message',
   '/market-prices': 'trend',
+  '/weather': 'partly',
   '/marketplace': 'store',
   '/services/labour': 'users',
   '/services/harvester': 'wheat',
