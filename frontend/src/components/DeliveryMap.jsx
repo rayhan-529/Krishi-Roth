@@ -470,6 +470,7 @@ export default function DeliveryMap({ trade, userId, onStatusChange }) {
                 maxLength={200}
                 value={vehicle}
                 onChange={(e) => setVehicle(e.target.value)}
+                aria-label={tr('গাড়ির তথ্য', 'Vehicle details')}
                 placeholder={tr('গাড়ির তথ্য (ঐচ্ছিক): যেমন পিকআপ, ঢাকা মেট্রো ন-১২৩৪, চালক ০১৭…', 'Vehicle details (optional): e.g. pickup, number plate, driver phone')}
               />
               <button type="button" className="btn btn-primary" onClick={() => sharing.start(vehicle.trim())}>
