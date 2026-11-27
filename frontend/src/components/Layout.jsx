@@ -7,11 +7,13 @@ import { Suspense, useEffect, useRef, useState } from 'react'
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useLang } from '../context/LanguageContext'
-import { get, patch } from '../services/api'
+import { patch } from '../services/api'
+import { useNotifications } from '../context/NotificationContext'
 import { label } from '../utils/labels'
-import { num } from '../utils/format'
+import { dateTime, num, timeAgo } from '../utils/format'
+import { notificationIcon } from '../utils/notifications'
 import { GUEST_TOP, HOME_BY_ROLE, NAV_ICON, menuFor } from '../utils/nav'
-import Icon from './Icon'
+import Icon, { Glyph } from './Icon'
 import { Avatar, Loader } from './ui'
 import Footer from './Footer'
 import ChatWidget from './ChatWidget'
@@ -49,28 +51,104 @@ function LanguageSwitch() {
   )
 }
 
-/** Bell with the unread count, refreshed every minute. */
+/**
+ * Bell with a live unread count. Clicking it opens a Facebook-style panel
+ * with the latest notifications; new ones arrive without a page refresh.
+ */
 function NotificationBell() {
   const { lang, tr } = useLang()
   const location = useLocation()
-  const [counts, setCounts] = useState({ unread: 0, unread_messages: 0 })
+  const navigate = useNavigate()
+  const n = useNotifications()
+  const [open, setOpen] = useState(false)
+  const [tab, setTab] = useState('all')
+  const ref = useRef(null)
+  const { loadRecent } = n
 
   useEffect(() => {
-    let alive = true
-    const load = () => get('/notifications/unread-count').then((b) => alive && setCounts(b.data)).catch(() => {})
-    load()
-    const timer = setInterval(load, 60000)
+    if (!open) return undefined
+    loadRecent()
+    const outside = (event) => ref.current && !ref.current.contains(event.target) && setOpen(false)
+    const escape = (event) => event.key === 'Escape' && setOpen(false)
+    document.addEventListener('mousedown', outside)
+    document.addEventListener('keydown', escape)
     return () => {
-      alive = false
-      clearInterval(timer)
+      document.removeEventListener('mousedown', outside)
+      document.removeEventListener('keydown', escape)
     }
-  }, [location.pathname])
+  }, [open, loadRecent])
+
+  useEffect(() => setOpen(false), [location.pathname])
+
+  function openItem(item) {
+    n.markRead(item)
+    setOpen(false)
+    if (item.link) navigate(item.link)
+  }
+
+  const items = n.recent ? (tab === 'unread' ? n.recent.filter((x) => !x.is_read) : n.recent) : null
 
   return (
-    <Link to="/notifications" className="icon-btn bell" aria-label={tr('নোটিফিকেশন', 'Notifications')}>
-      <Icon name="bell" />
-      {counts.unread > 0 && <span className="dot-count">{num(Math.min(counts.unread, 99), lang)}</span>}
-    </Link>
+    <div className="notif-bell" ref={ref}>
+      <button
+        type="button"
+        className={`icon-btn bell ${open ? 'active' : ''}`}
+        onClick={() => setOpen((o) => !o)}
+        aria-label={tr('নোটিফিকেশন', 'Notifications')}
+        aria-expanded={open}
+        aria-haspopup="dialog"
+      >
+        <Icon name="bell" />
+        {n.unread > 0 && <span className="dot-count">{n.unread > 99 ? `${num(99, lang)}+` : num(n.unread, lang)}</span>}
+      </button>
+
+      {open && (
+        <div className="notif-panel" role="dialog" aria-label={tr('নোটিফিকেশন', 'Notifications')}>
+          <div className="notif-panel-head">
+            <strong>{tr('নোটিফিকেশন', 'Notifications')}</strong>
+            <span className={`live-dot ${n.live ? 'on' : ''}`} title={n.live ? tr('লাইভ', 'Live') : tr('সংযোগ হচ্ছে…', 'Connecting…')} />
+            {n.unread > 0 && (
+              <button type="button" className="link-btn" onClick={() => n.markAllRead().catch(() => {})}>
+                {tr('সব পড়া হয়েছে', 'Mark all read')}
+              </button>
+            )}
+          </div>
+          <div className="notif-panel-tabs" role="tablist">
+            <button type="button" role="tab" aria-selected={tab === 'all'} className={tab === 'all' ? 'active' : ''} onClick={() => setTab('all')}>{tr('সব', 'All')}</button>
+            <button type="button" role="tab" aria-selected={tab === 'unread'} className={tab === 'unread' ? 'active' : ''} onClick={() => setTab('unread')}>{tr('অপঠিত', 'Unread')}</button>
+          </div>
+
+          <div className="notif-panel-body">
+            {!items ? (
+              <div className="notif-panel-empty">{tr('লোড হচ্ছে…', 'Loading…')}</div>
+            ) : items.length === 0 ? (
+              <div className="notif-panel-empty">
+                <span aria-hidden="true">🔔</span>
+                {tab === 'unread' ? tr('কোনো অপঠিত নোটিফিকেশন নেই', 'No unread notifications') : tr('কোনো নোটিফিকেশন নেই', 'No notifications yet')}
+              </div>
+            ) : (
+              <ul className="notif-panel-list">
+                {items.map((item) => (
+                  <li key={item.id}>
+                    <button type="button" className={item.is_read ? '' : 'unread'} onClick={() => openItem(item)}>
+                      <span className="notif-panel-icon" aria-hidden="true"><Glyph value={notificationIcon(item.type)} /></span>
+                      <span className="notif-panel-text">
+                        <strong>{item.title}</strong>
+                        {item.body && <span>{item.body}</span>}
+                        <small title={dateTime(item.created_at, lang)}>{timeAgo(item.created_at, lang)}</small>
+                      </span>
+                      {!item.is_read && <span className="unread-dot" aria-label={tr('অপঠিত', 'Unread')} />}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <Link to="/notifications" className="notif-panel-foot">{tr('সব নোটিফিকেশন দেখুন', 'See all notifications')}</Link>
+        </div>
+      )}
+    </div>
   )
 }
 

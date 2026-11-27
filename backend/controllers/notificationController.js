@@ -5,6 +5,9 @@ const db = require("../config/db");
 const v = require("../utils/validator");
 const { send } = require("../utils/response");
 const { getPagination, paginate } = require("../utils/pagination");
+const ApiError = require("../utils/ApiError");
+const live = require("../services/liveService");
+const { NOTIFICATION_COLUMNS } = require("../services/notificationService");
 
 const schemas = {
   list: { unread_only: v.boolean().default(false), type: v.string().max(50), page: v.integer(), limit: v.integer() }
@@ -20,7 +23,7 @@ async function list(req, res) {
   }
 
   const { rows, meta } = await paginate(db, {
-    selectSql: "SELECT id, type, title, body, link, entity_type, entity_id, is_read, read_at, created_at",
+    selectSql: `SELECT ${NOTIFICATION_COLUMNS}`,
     fromSql: `FROM notifications WHERE ${where.join(" AND ")}`,
     params,
     orderSql: "ORDER BY created_at DESC, id DESC",
@@ -45,11 +48,29 @@ async function unreadCount(req, res) {
   send(req, res, { data: { unread: Number(unread), unread_messages: Number(messages) } });
 }
 
+/** One-time ticket for opening the live stream (EventSource cannot send the login header). */
+async function streamTicket(req, res) {
+  send(req, res, { data: live.issueTicket(req.user.id, req.sessionJti) });
+}
+
+/** Live stream: GET /notifications/stream?ticket=... (Server-Sent Events). */
+async function stream(req, res) {
+  const owner = live.redeemTicket(req.query.ticket);
+  if (!owner || !(await live.sessionIsValid(owner.userId, owner.jti))) {
+    throw ApiError.unauthorized(
+      "লাইভ নোটিফিকেশনের সংযোগ শেষ হয়েছে। আবার চেষ্টা করুন।",
+      "The live notification link has expired. Please try again."
+    );
+  }
+  live.openStream(req, res, owner, { unread: await live.unreadCount(null, owner.userId) });
+}
+
 async function markRead(req, res) {
   await db.query("UPDATE notifications SET is_read = 1, read_at = NOW() WHERE id = ? AND user_id = ? AND is_read = 0", [
     req.params.id,
     req.user.id
   ]);
+  live.publishUnread(req.user.id).catch(() => {});
   send(req, res, { data: { id: req.params.id, is_read: 1 } });
 }
 
@@ -57,6 +78,7 @@ async function markAllRead(req, res) {
   const [result] = await db.query("UPDATE notifications SET is_read = 1, read_at = NOW() WHERE user_id = ? AND is_read = 0", [
     req.user.id
   ]);
+  live.publishUnread(req.user.id).catch(() => {});
   send(req, res, {
     message: ["সব নোটিফিকেশন পড়া হয়েছে।", "All notifications marked as read."],
     data: { updated: result.affectedRows }
@@ -65,7 +87,8 @@ async function markAllRead(req, res) {
 
 async function remove(req, res) {
   await db.query("DELETE FROM notifications WHERE id = ? AND user_id = ?", [req.params.id, req.user.id]);
+  live.publishUnread(req.user.id).catch(() => {});
   send(req, res, { message: ["মুছে ফেলা হয়েছে।", "Deleted."] });
 }
 
-module.exports = { schemas, list, unreadCount, markRead, markAllRead, remove };
+module.exports = { schemas, list, unreadCount, streamTicket, stream, markRead, markAllRead, remove };

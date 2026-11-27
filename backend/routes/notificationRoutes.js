@@ -5,7 +5,11 @@ const { validateQuery, validateId } = require("../middleware/validate");
 
 const router = express.Router();
 
+// The live stream checks its own one-time ticket (EventSource cannot send the login header).
+router.get("/stream", c.stream);
+
 router.use(authenticate);
+router.post("/stream-ticket", c.streamTicket);
 router.get("/", validateQuery(c.schemas.list), c.list);
 router.get("/unread-count", c.unreadCount);
 router.patch("/read-all", c.markAllRead);

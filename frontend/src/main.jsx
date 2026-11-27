@@ -7,6 +7,7 @@ import { LanguageProvider } from './context/LanguageContext'
 import { AuthProvider } from './context/AuthContext'
 import { LookupsProvider } from './context/LookupsContext'
 import { ToastProvider } from './context/ToastContext'
+import { NotificationProvider } from './context/NotificationContext'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -14,9 +15,11 @@ createRoot(document.getElementById('root')).render(
       <LanguageProvider>
         <ToastProvider>
           <AuthProvider>
-            <LookupsProvider>
-              <App />
-            </LookupsProvider>
+            <NotificationProvider>
+              <LookupsProvider>
+                <App />
+              </LookupsProvider>
+            </NotificationProvider>
           </AuthProvider>
         </ToastProvider>
       </LanguageProvider>

@@ -9,7 +9,7 @@ const { send } = require("../utils/response");
 const { getPagination, paginate } = require("../utils/pagination");
 const { sqlFilter } = require("../utils/sqlFilter");
 const { withTransaction } = require("../services/transaction");
-const { notify, notifyMany } = require("../services/notificationService");
+const { notify, notifyMany, pushAnnouncement } = require("../services/notificationService");
 const { logActivity } = require("../services/activityService");
 const { revokeAllSessions } = require("../services/tokenService");
 const trades = require("../services/tradeService");
@@ -542,14 +542,15 @@ async function createAnnouncement(req, res) {
        WHERE is_blocked = 0 ${role ? "AND role = ?" : ""}`,
       role ? [title, body.slice(0, 1000), result.insertId, result.insertId, role] : [title, body.slice(0, 1000), result.insertId, result.insertId]
     );
-    return sent.affectedRows;
+    return { count: sent.affectedRows, announcementId: result.insertId };
   });
+  pushAnnouncement(recipients.announcementId).catch((error) => console.error("Live announcement failed:", error.message));
 
   await logActivity(req, "admin.announcement", "announcement", null, title);
   send(req, res, {
     status: 201,
-    message: [`ঘোষণা ${recipients} জনকে পাঠানো হয়েছে।`, `Announcement sent to ${recipients} user(s).`],
-    data: { recipients }
+    message: [`ঘোষণা ${recipients.count} জনকে পাঠানো হয়েছে।`, `Announcement sent to ${recipients.count} user(s).`],
+    data: { recipients: recipients.count }
   });
 }
 
