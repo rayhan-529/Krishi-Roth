@@ -52,7 +52,7 @@ function LanguageSwitch() {
 }
 
 /**
- * Bell with a live unread count. Clicking it opens a Facebook-style panel
+ * Bell with a live unread count. Clicking it opens a dropdown panel
  * with the latest notifications; new ones arrive without a page refresh.
  */
 function NotificationBell() {
