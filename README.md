@@ -20,7 +20,8 @@ Krishi Roth helps Bangladeshi farmers sell crops at fair prices directly to buye
 | Expense notebook | A ruled, paper-notebook-style grid that starts with 25 rows and can grow. Row totals and the production cost are calculated automatically, with cost per crop and per harvest. |
 | Labour & machinery | Search workers, harvesters, tractors and transport by area, price and availability. Booking requests have accept/reject, protection against double bookings, and completion. |
 | AI assistant | Bengali/English farming chatbot through a backend API (Gemini by default; OpenAI or Claude also supported). It shows a clear "not configured" message when no API key is set. |
-| Notifications | In-app notifications for offers, bookings, trades, harvest reminders, price updates, verification and announcements. |
+| Notifications | In-app notifications for offers, bookings, trades, harvest reminders, price updates, verification and announcements. They arrive live (Server-Sent Events): the bell count updates without a refresh and opens a dropdown of the latest notifications. |
+| Delivery map | On each trade, the farmer marks the pickup point and the buyer the delivery point on a map (Leaflet + OpenStreetMap, no API key). During delivery, whoever brings the vehicle shares their phone's live location; the other person sees it move with the distance left and an estimated arrival time. |
 | Ratings & reviews | 1–5 stars, only after a completed trade or booking, once per person. Admins can moderate reviews. |
 | Verification | Users upload an ID document, which is stored privately in the database. Admins approve or reject. |
 | Admin panel | Statistics, users (block/unblock, role change), verifications, listings and the crop catalogue, market prices, trades and dispute decisions, bookings, complaints, review moderation, announcements, reports and an activity log. |
