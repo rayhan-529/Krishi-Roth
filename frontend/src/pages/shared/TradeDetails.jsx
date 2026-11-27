@@ -1,9 +1,10 @@
 /** One trade: progress steps, the next action for this user, history, contacts and review. */
-import { useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useLang } from '../../context/LanguageContext'
 import { useToast } from '../../context/ToastContext'
+import { useNotifications } from '../../context/NotificationContext'
 import { useFetch, useForm } from '../../hooks/useFetch'
 import { get, patch } from '../../services/api'
 import { label, options } from '../../utils/labels'
@@ -12,6 +13,9 @@ import ReviewModal from '../../components/ReviewModal'
 import { Alert, Avatar, Card, ConfirmButton, ErrorBox, Input, Loader, PageHeader, Select, Stars, StatusBadge, SubmitButton, VerifiedBadge } from '../../components/ui'
 import Icon from '../../components/Icon'
 import CardSoon from '../../components/CardSoon'
+
+// The map library is large, so it loads only on this page.
+const DeliveryMap = lazy(() => import('../../components/DeliveryMap'))
 
 const STEPS = ['payment_pending', 'payment_confirmed', 'delivery_pending', 'completed']
 
@@ -109,6 +113,14 @@ export default function TradeDetails() {
   const [busy, setBusy] = useState(false)
   const [reviewing, setReviewing] = useState(false)
   const ship = useForm({ delivery_method: 'farmer_delivery', delivery_address: '', expected_delivery_date: '' })
+  const live = useNotifications()
+  const quietReload = useCallback(() => reload(), [reload])
+
+  // The other person acted on this trade (paid, started delivery, ...): refresh without a page reload.
+  useEffect(
+    () => live.onNew((n) => n.entity_type === 'trade' && String(n.entity_id) === String(id) && reload()),
+    [live, id, reload],
+  )
 
   async function act(action, extra = {}) {
     setBusy(true)
@@ -151,10 +163,15 @@ export default function TradeDetails() {
               <form className="form" onSubmit={(e) => { e.preventDefault(); act('start_delivery', ship.values).catch(() => {}) }}>
                 <p>{tr('ফসল পাঠানোর তথ্য দিন।', 'Enter the delivery details.')}</p>
                 <div className="grid-2">
-                  <Select label={tr('ডেলিভারি পদ্ধতি', 'Delivery method')} options={options('deliveryMethod', lang)} {...ship.bind('delivery_method')} />
+                  <Select label={tr('গাড়ির ব্যবস্থা কে করবেন', 'Who brings the vehicle')} options={options('deliveryMethod', lang)} {...ship.bind('delivery_method')} />
                   <Input type="date" label={tr('সম্ভাব্য তারিখ', 'Expected date')} {...ship.bind('expected_delivery_date')} />
                 </div>
                 <Input label={tr('ডেলিভারির ঠিকানা', 'Delivery address')} maxLength={255} {...ship.bind('delivery_address')} />
+                <p className="small muted">
+                  {ship.values.delivery_method === 'buyer_pickup'
+                    ? tr('ক্রেতা গাড়ি নিয়ে আসবেন। রওনা হলে ক্রেতার লাইভ লোকেশন আপনি ম্যাপে দেখবেন।', 'The buyer brings the vehicle. You will see the buyer\'s live location on the map.')
+                    : tr('আপনি (বা আপনার ভাড়া করা গাড়ি) ফসল পৌঁছে দেবেন। রওনা হয়ে ম্যাপ থেকে লাইভ লোকেশন চালু করবেন, ক্রেতা দেখতে পাবেন।', 'You (or a vehicle you hire) deliver the crop. Turn on live location from the map when you leave so the buyer can follow.')}
+                </p>
                 <SubmitButton busy={busy}>{tr('ফসল পাঠানো শুরু', 'Start delivery')}</SubmitButton>
                 {ship.values.delivery_method === 'transport_service' && <p className="small"><Link to="/services/transport">{tr('পরিবহন বুক করুন', 'Book transport')} →</Link></p>}
               </form>
@@ -193,6 +210,12 @@ export default function TradeDetails() {
               </div>
             )}
           </Card>
+
+          {t.status !== 'cancelled' && (
+            <Suspense fallback={<Card title={tr('ম্যাপ ও ডেলিভারি', 'Map & delivery')}><Loader inline /></Card>}>
+              <DeliveryMap trade={t} userId={user.id} onStatusChange={quietReload} />
+            </Suspense>
+          )}
 
           <Card title={tr('ইতিহাস', 'History')}>
             <ul className="timeline">
