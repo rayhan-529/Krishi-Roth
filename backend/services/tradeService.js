@@ -27,6 +27,10 @@ async function changeStatus(conn, trade, toStatus, userId, note = null, extraSql
     `INSERT INTO trade_status_history (trade_id, from_status, to_status, changed_by, note) VALUES (?, ?, ?, ?, ?)`,
     [trade.id, trade.status, toStatus, userId, note]
   );
+  // Live location is only shared while the crop is on the way.
+  if (toStatus !== "delivery_pending") {
+    await conn.query("UPDATE trade_records SET tracking_active = 0 WHERE id = ? AND tracking_active = 1", [trade.id]);
+  }
 }
 
 /** A cancelled trade gives its quantity back to the listing. */

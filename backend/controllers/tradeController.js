@@ -21,6 +21,7 @@ const wallet = require("../services/walletService");
 const { notifyMany } = require("../services/notificationService");
 const { logActivity } = require("../services/activityService");
 const { releaseDueEscrows } = require("../services/escrowService");
+const { publishMap, trackerId } = require("./tradeMapController");
 
 const TRADE_STATUSES = ["payment_pending", "payment_confirmed", "delivery_pending", "completed", "cancelled", "disputed"];
 
@@ -84,6 +85,7 @@ async function loadTradeDetails(id) {
     [id]
   );
   trade.history = history;
+  trade.tracker_id = trackerId(trade);
   return trade;
 }
 
@@ -210,6 +212,8 @@ async function act(req, res) {
     }
   });
 
+  // The map on both people's screens follows the new status (e.g. live sharing ends).
+  publishMap(req.params.id).catch(() => {});
   await logActivity(req, `trade.${data.action}`, "trade", req.params.id);
   send(req, res, {
     message: ["লেনদেন হালনাগাদ হয়েছে।", "Trade updated."],
