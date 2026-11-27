@@ -34,7 +34,21 @@ const COLUMNS = [
   ["trade_records", "auto_release_at", "DATETIME NULL"],
   // v1.6: chatbot answers remember which knowledge-base documents they used
   ["chatbot_messages", "sources", "TEXT NULL"],
-  ["kb_documents", "content_hash", "CHAR(64) NULL"]
+  ["kb_documents", "content_hash", "CHAR(64) NULL"],
+  // v1.7: delivery map and live vehicle location
+  ["trade_records", "pickup_lat", "DECIMAL(9,6) NULL"],
+  ["trade_records", "pickup_lng", "DECIMAL(9,6) NULL"],
+  ["trade_records", "drop_lat", "DECIMAL(9,6) NULL"],
+  ["trade_records", "drop_lng", "DECIMAL(9,6) NULL"],
+  ["trade_records", "tracking_active", "TINYINT(1) NOT NULL DEFAULT 0"],
+  ["trade_records", "tracking_by", "INT UNSIGNED NULL"],
+  ["trade_records", "vehicle_info", "VARCHAR(200) NULL"],
+  ["trade_records", "live_lat", "DECIMAL(9,6) NULL"],
+  ["trade_records", "live_lng", "DECIMAL(9,6) NULL"],
+  ["trade_records", "live_accuracy", "INT UNSIGNED NULL"],
+  ["trade_records", "live_speed", "DECIMAL(6,2) NULL"],
+  ["trade_records", "live_heading", "SMALLINT NULL"],
+  ["trade_records", "live_updated_at", "DATETIME NULL"]
 ];
 
 function createStatement(schema, table) {
