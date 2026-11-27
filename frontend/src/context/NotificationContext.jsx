@@ -7,6 +7,7 @@
  *   n.loadRecent()      // (re)load the dropdown list
  *   n.markRead(item)    n.markAllRead()    n.remove(id)
  *   n.onNew(fn)         // subscribe to new notifications; returns an unsubscribe function
+ *   n.onEvent('trade_map', fn)  // other live events (delivery map); 'ready' fires on every (re)connect
  *
  * How "live" works: the backend keeps a Server-Sent Events stream open
  * (/api/notifications/stream). EventSource cannot send the login header, so
@@ -32,6 +33,7 @@ export function NotificationProvider({ children }) {
   const [recent, setRecent] = useState(null)
   const [live, setLive] = useState(false)
   const listeners = useRef(new Set())
+  const eventListeners = useRef(new Map()) // event name -> Set<fn>
   const pathRef = useRef(location.pathname)
   const recentLoaded = useRef(false)
 
@@ -97,13 +99,18 @@ export function NotificationProvider({ children }) {
 
       source = new EventSource(`${API_URL}/api/notifications/stream?ticket=${encodeURIComponent(ticket)}`)
 
+      const emit = (name, data) => (eventListeners.current.get(name) || []).forEach((fn) => fn(data))
+
       source.addEventListener('ready', (event) => {
         attempt = 0
         markLive(true)
         setUnread(JSON.parse(event.data).unread)
         // Anything that arrived while we were offline shows up in the dropdown.
         if (recentLoaded.current) loadRecent()
+        emit('ready', null)
       })
+
+      source.addEventListener('trade_map', (event) => emit('trade_map', JSON.parse(event.data)))
 
       source.addEventListener('notification', (event) => {
         const { notification, unread: count } = JSON.parse(event.data)
@@ -190,9 +197,15 @@ export function NotificationProvider({ children }) {
     return () => listeners.current.delete(fn)
   }, [])
 
+  const onEvent = useCallback((name, fn) => {
+    if (!eventListeners.current.has(name)) eventListeners.current.set(name, new Set())
+    eventListeners.current.get(name).add(fn)
+    return () => eventListeners.current.get(name).delete(fn)
+  }, [])
+
   const value = useMemo(
-    () => ({ unread, recent, live, loadRecent, refreshUnread, markRead, markAllRead, remove, onNew }),
-    [unread, recent, live, loadRecent, refreshUnread, markRead, markAllRead, remove, onNew],
+    () => ({ unread, recent, live, loadRecent, refreshUnread, markRead, markAllRead, remove, onNew, onEvent }),
+    [unread, recent, live, loadRecent, refreshUnread, markRead, markAllRead, remove, onNew, onEvent],
   )
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>
